@@ -325,8 +325,9 @@ def enum_previews_from_directory_items(context, pcoll, directory):
 def open_n_sidebar():
     override = get_area_override(area_type='VIEW_3D')
 
-    # bpy.ops.wm.context_toggle(override, data_path="space_data.show_region_ui")
-    bpy.ops.wm.context_set_value(override, data_path="space_data.show_region_ui", value='True')
+    with bpy.context.temp_override(**override):
+        # bpy.ops.wm.context_toggle(override, data_path="space_data.show_region_ui")
+        bpy.ops.wm.context_set_value(data_path="space_data.show_region_ui", value='True')
 
 
 # function should only be executed once the scene is available (after Blender is fully loaded)

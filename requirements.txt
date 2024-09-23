@@ -1,0 +1,3 @@
+bpy
+requests
+debugpy
