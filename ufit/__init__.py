@@ -138,7 +138,9 @@ def register():
     # configure logging (should be done here due to authentication logging)
     config = read_ini()
     enable_debug = config.getboolean('debug', 'enable_debug')
+    debugger_port = config.getint('debug', 'debugger_port')
     configure_logging(enable_debug)
+    # configure_debugger(enable_debug, debugger_port)
 
     # reload modules
     reload_modules()

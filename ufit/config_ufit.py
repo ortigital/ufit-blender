@@ -17,6 +17,11 @@ def configure_logging(enable_debug):
         logging.basicConfig(level=logging.INFO)
 
 
+def configure_debugger(enable_debug, debugger_port):
+    if enable_debug:
+        pass  # TODO
+
+
 def configure_full_debug(context, workspace, ufit_device, ufit_step):
     # base_globals.debug_enabled = True
     configure_logging(enable_debug=True)
