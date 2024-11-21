@@ -1,5 +1,5 @@
 from .core.OT_base import OTBase
-from .core.platform import platform_login
+import ufit.base.src.operators.core.platform as platform
 
 
 class OTPlatformLogin(OTBase):
@@ -19,4 +19,4 @@ class OTPlatformLogin(OTBase):
                                  'platform_login')
 
     def main_func(self, context):
-        platform_login(context)
+        platform.platform_login(context)

@@ -1,3 +1,4 @@
+import importlib
 import os
 import sys
 from datetime import datetime
@@ -8,7 +9,8 @@ from .config_ufit import configure_logging, configure_full_debug, logger
 from .base.src import base_globals
 from .base.src.operators.utils import user_interface
 from .base.src.operators.utils.general import set_ufit_logo
-from .base.src.operators.utils.authenticate import platform_authenticate, is_authenticated, set_ufit_authetication_vars
+import ufit.base.src.operators.utils.authenticate as authenticate
+from .patches import patch
 
 bl_info = {
     "name": "uFit",
@@ -23,6 +25,7 @@ modulesNames = [
     'transtibial',
     'transfemoral',
     'free_sculpting',
+    'patches',
 ]
 
 enable_addons = [
@@ -46,6 +49,17 @@ enable_addons = [
 modules_full_names = {}
 for mod in modulesNames:
     modules_full_names[mod] = ('{}.{}'.format(__name__, mod))
+
+
+# Переопределяем importlib.reload
+_original_reload = importlib.reload
+
+def patched_reload(module):
+    result = _original_reload(module)
+    patch()
+    return result
+
+importlib.reload = patched_reload
 
 
 def read_ini():
@@ -101,9 +115,9 @@ def init_ufit():
     user_interface.set_outliner_restriction('show_restrict_column_select', True)
 
     if not base_globals.debug_enabled:
-        platform_authenticate(bpy.context)
+        authenticate.platform_authenticate(bpy.context)
     else:
-        set_ufit_authetication_vars(bpy.context)
+        authenticate.set_ufit_authetication_vars(bpy.context)
 
     # jump to device_type step if authenticated OR last_authenticated is less than 10 days ago
     if bpy.context.scene.ufit_active_step == 'platform_login':
@@ -116,7 +130,7 @@ def init_ufit():
             delta = now - last_authenticated
             days_diff = delta.days
 
-        if is_authenticated() and \
+        if authenticate.is_authenticated() and \
                 (days_diff <= 10 and bpy.context.scene.ufit_user and bpy.context.scene.ufit_password):  # make sure authentication happens every 10 days
             bpy.context.scene.ufit_active_step = 'device_type'
             load_ufit_config()
@@ -148,6 +162,8 @@ def register():
         if current_module_name in sys.modules:
             if hasattr(sys.modules[current_module_name], 'register'):
                 sys.modules[current_module_name].register()
+
+    patch()
 
     # DON'T USE HANDLER!
     # bpy.app.handlers.load_post.append(handler_blender_loaded)  # wait until scene is loaded

@@ -1,7 +1,7 @@
 import bpy
-from ....src import base_globals
+
 from datetime import datetime
-from ..utils.authenticate import platform_authenticate, is_authenticated
+import ufit.base.src.operators.utils.authenticate as authenticate
 
 
 def platform_login(context):
@@ -9,9 +9,9 @@ def platform_login(context):
     ufit_prefs.username = context.scene.ufit_user
     ufit_prefs.password = context.scene.ufit_password
 
-    platform_authenticate(context)
+    authenticate.platform_authenticate(context)
 
-    if is_authenticated():
+    if authenticate.is_authenticated():
         ufit_prefs.last_authentication = datetime.now().strftime("%Y%m%d_%H%M%S")
     else:
         ufit_prefs.username = ""

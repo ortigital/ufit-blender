@@ -1,4 +1,3 @@
-import bpy
 import json
 import requests
 from ....src import base_globals
