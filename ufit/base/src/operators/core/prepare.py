@@ -1,3 +1,4 @@
+from math import  floor, ceil
 import bpy
 from ..utils import annotations, general, user_interface, color_attributes
 
@@ -242,6 +243,30 @@ def save_rotation(context):
 def prep_circumferences(context):
     pass
 
+def get_min_max_z(obj):
+    """
+    Return min and max coordinate Z for object.
+    :param obj: Mesh Object.
+    :return: Tuple (min_z, max_z).
+    """
+    if obj and obj.type == 'MESH':
+        mesh = obj.data
+        min_z = max_z = mesh.vertices[0].co.z
+        for vertex in mesh.vertices:
+            z = vertex.co.z
+            if z < min_z:
+                min_z = z
+            if z > max_z:
+                max_z = z
+
+        return min_z, max_z
+    else:
+        raise ValueError("Object isn't mesh or not existing.")
+def snappedf(value: float, step: float) -> float:
+    return floor(value / step) * step
+
+def snappedc(value: float, step: float) -> float:
+    return ceil(value / step) * step
 
 def add_circumference(context, i, z=0.0):
     measure_obj = bpy.data.objects['uFit']
@@ -271,8 +296,21 @@ def add_circumference(context, i, z=0.0):
     boolean_mod.solver = 'FAST'
     boolean_mod.object = measure_obj
 
-    # Set the origin to the median point of the object
+    # set the origin to the median point of the object
     bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
+
+    # add limit location constraint
+    limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
+    limit_loc.use_min_z = True
+    limit_loc.use_max_z = True
+    limit_loc.use_transform_limit=True
+    limit_loc.min_z, limit_loc.max_z = get_min_max_z(measure_obj)
+    
+    # adding offset
+    # 0.01 - 1cm
+    step=0.001
+    limit_loc.min_z=snappedc(limit_loc.min_z,step)+step
+    limit_loc.max_z=snappedf(limit_loc.max_z,step)-step
 
     # set the move tool
     bpy.ops.wm.tool_set_by_id(name="builtin.move")
