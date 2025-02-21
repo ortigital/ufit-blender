@@ -1,4 +1,4 @@
-from math import  floor, ceil
+from math import floor, ceil
 import bpy
 from ..utils import annotations, general, user_interface, color_attributes
 
@@ -243,6 +243,7 @@ def save_rotation(context):
 def prep_circumferences(context):
     pass
 
+
 def get_min_max_z(obj):
     """
     Return min and max coordinate Z for object.
@@ -262,11 +263,15 @@ def get_min_max_z(obj):
         return min_z, max_z
     else:
         raise ValueError("Object isn't mesh or not existing.")
+
+
 def snappedf(value: float, step: float) -> float:
     return floor(value / step) * step
 
+
 def snappedc(value: float, step: float) -> float:
     return ceil(value / step) * step
+
 
 def add_circumference(context, i, z=0.0):
     measure_obj = bpy.data.objects['uFit']
@@ -303,14 +308,14 @@ def add_circumference(context, i, z=0.0):
     limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
     limit_loc.use_min_z = True
     limit_loc.use_max_z = True
-    limit_loc.use_transform_limit=True
+    limit_loc.use_transform_limit = True
     limit_loc.min_z, limit_loc.max_z = get_min_max_z(measure_obj)
-    
+
     # adding offset
     # 0.01 - 1cm
-    step=0.001
-    limit_loc.min_z=snappedc(limit_loc.min_z,step)+step
-    limit_loc.max_z=snappedf(limit_loc.max_z,step)-step
+    step = 0.001
+    limit_loc.min_z = snappedc(limit_loc.min_z, step) + step
+    limit_loc.max_z = snappedf(limit_loc.max_z, step) - step
 
     # set the move tool
     bpy.ops.wm.tool_set_by_id(name="builtin.move")

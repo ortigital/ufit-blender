@@ -3,9 +3,9 @@
 :: Blander folder
 set "BLENDER_PATH=C:\Users\sover\Desktop\blender\blender-3.5.1-windows-x64"
 
-:: Переменная для пути к папке аддона
-set "ADDON_SOURCE=ufit"  REM Путь к локальной папке аддона
-set "ADDON_DEST=%BLENDER_PATH%\3.5\scripts\addons\ufit"  REM Путь к целевой папке аддона в Blender
+:: Addon path
+set "ADDON_SOURCE=ufit"  REM Local folder of addon
+set "ADDON_DEST=%BLENDER_PATH%\3.5\scripts\addons\ufit"  REM Target folder
 
 :: Remove the ufit folder and its contents
 if exist "%ADDON_DEST%" (
@@ -26,6 +26,6 @@ if exist "%ADDON_DEST%\__init_plugins__.py" (
 :: Terminate Blender
 taskkill /F /IM blender.exe >nul 2>&1
 
-:: Запуск Blender
+:: Start Blender
 "%BLENDER_PATH%\blender.exe"
 pause
