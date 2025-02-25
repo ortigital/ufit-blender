@@ -1,4 +1,5 @@
 import os
+import copy
 import bpy
 import bmesh
 import math
@@ -435,37 +436,42 @@ def activate_object(context, active_obj, mode='OBJECT', hide_select_all=True):
             bpy.ops.wm.context_set_value(data_path="space_data.show_region_tool_header", value='False')
 
 
+def get_distance(v1, v2):
+    return ((v1[0] - v2[0])**2 + (v1[1] - v2[1])**2)**0.5
 
 
 def order_verts_by_closest(verts):
+    if not verts:
+        return []
+
     ordered_verts = []
-    non_ordered_verts = verts.copy()
-    for i in range(0, len(verts)):
-        if i == 0:
-            ordered_verts.append(non_ordered_verts[0])
-        else:
-            vert = ordered_verts[-1]
-            non_ordered_verts.sort(reverse=False, key=lambda v: get_distance(v, vert))
-            ordered_verts.append(non_ordered_verts[0])
+    non_ordered_verts = copy.deepcopy(verts)
 
-        del non_ordered_verts[0]
+    ordered_verts.append(non_ordered_verts.pop(0))
 
+    while non_ordered_verts:
+        last_vert = ordered_verts[-1]
+        distances = [get_distance(v, last_vert) for v in non_ordered_verts]
+        closest_index = np.argmin(distances)
+        closest_vert = non_ordered_verts.pop(closest_index)
+        ordered_verts.append(closest_vert)
+    del ordered_verts[-1]
     return ordered_verts
 
 
 def creat_path_by_points(cpath, points):
     if cpath.type in ['NURBS', 'POLY']:
-        cpath.points.add(len(points)-1)
+        cpath.points.add(len(points) - 1)
         for (index, point) in enumerate(points):
             cpath.points[index].co = point
         cpath.use_endpoint_u = False
     elif cpath.type in ['BEZIER']:
-        cpath.bezier_points.add(len(points)-1)
+        cpath.bezier_points.add(len(points) - 1)
         for (index, point) in enumerate(points):
             x, y, z, w = point
             cpath.bezier_points[index].co = x, y, z
-            cpath.bezier_points[index].handle_left = x-1, y-1, z-1
-            cpath.bezier_points[index].handle_right = x+1, y+1, z+1
+            cpath.bezier_points[index].handle_left = x - 1, y - 1, z - 1
+            cpath.bezier_points[index].handle_right = x + 1, y + 1, z + 1
     return
 
 
@@ -807,6 +813,7 @@ def get_vertices_from_vertex_group(obj, vg_name):
                 })
 
     return vertices
+
 
 def get_vertices_from_multiple_vertex_groups(obj, vg_names):
     # Get vertex groups indeces
