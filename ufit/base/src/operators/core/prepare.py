@@ -244,25 +244,20 @@ def prep_circumferences(context):
     pass
 
 
-def get_min_max_z(obj):
+def get_min_max(obj, axis: str):
     """
-    Return min and max coordinate Z for object.
+    Return min and max coordinate for given axis of an object.
     :param obj: Mesh Object.
-    :return: Tuple (min_z, max_z).
+    :param axis: Axis ('x', 'y', or 'z').
+    :return: Tuple (min_val, max_val).
     """
     if obj and obj.type == 'MESH':
         mesh = obj.data
-        min_z = max_z = mesh.vertices[0].co.z
-        for vertex in mesh.vertices:
-            z = vertex.co.z
-            if z < min_z:
-                min_z = z
-            if z > max_z:
-                max_z = z
-
-        return min_z, max_z
+        axis_index = {'x': 0, 'y': 1, 'z': 2}[axis]
+        coords = [v.co[axis_index] for v in mesh.vertices]
+        return min(coords), max(coords)
     else:
-        raise ValueError("Object isn't mesh or not existing.")
+        raise ValueError("Object isn't a mesh or does not exist.")
 
 
 def snappedf(value: float, step: float) -> float:
@@ -304,18 +299,17 @@ def add_circumference(context, i, z=0.0):
     # Set the origin to the median point of the object
     bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
 
-    # Add limit location constraint
+    # Add limit location constraint (only for Z-axis)
     limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
-    limit_loc.use_min_z = True
-    limit_loc.use_max_z = True
     limit_loc.use_transform_limit = True
-    limit_loc.min_z, limit_loc.max_z = get_min_max_z(measure_obj)
+    step = 0.001  # Adding offset
+    min_z, max_z = get_min_max(measure_obj, 'z')
+    limit_loc.use_min_z = limit_loc.use_max_z = True
+    limit_loc.min_z = snappedc(min_z, step) + step
+    limit_loc.max_z = snappedf(max_z, step) - step
 
-    # Adding offset
-    # 0.01 - 1cm
-    step = 0.001
-    limit_loc.min_z = snappedc(limit_loc.min_z, step) + step
-    limit_loc.max_z = snappedf(limit_loc.max_z, step) - step
+    limit_loc.use_min_x = limit_loc.use_max_x = False
+    limit_loc.use_min_y = limit_loc.use_max_y = False
 
     # Set the move tool
     bpy.ops.wm.tool_set_by_id(name="builtin.move")

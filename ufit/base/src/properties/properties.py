@@ -211,7 +211,7 @@ def register():
     bpy.types.Scene.ufit_sculpt_circumferences = FloatVectorProperty(name='Sculpt. Circumferences', size=max_num_circumferences)
     bpy.types.Scene.ufit_circumferences = FloatVectorProperty(name='Circumferences', size=max_num_circumferences)
     bpy.types.Scene.ufit_circums_highlighted = BoolProperty(name='Circumferences Highlighted', default=False)
-    bpy.types.Scene.ufit_circums_distance = FloatProperty(name="Distance", min=0.0001, max=float("inf"), step=0.0001,
+    bpy.types.Scene.ufit_circums_distance = FloatProperty(name="Distance", min=0.001, max=float("inf"), step=0.01,
                                                           default=0.05, subtype="DISTANCE", unit="LENGTH")
 
     # sculpt
