@@ -125,7 +125,7 @@ def get_space(space_type='VIEW_3D', screens=None):
     for s in screens:
         for spc in s.areas:
             if spc.type == space_type:
-                return spc.spaces[0] # we expect at most 1 VIEW_3D space
+                return spc.spaces[0]  # we expect at most 1 VIEW_3D space
 
 
 def set_shading_solid_mode(light='STUDIO', color_type='MATERIAL'):

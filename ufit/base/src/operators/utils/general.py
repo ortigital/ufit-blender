@@ -443,7 +443,7 @@ def order_verts_by_closest(verts):
     if not verts:
         return []
     ordered_verts = []
-    non_ordered_verts = verts.copy()  # Более эффективное копирование
+    non_ordered_verts = verts.copy()
     ordered_verts.append(non_ordered_verts.pop(0))
     while non_ordered_verts:
         last_vert = ordered_verts[-1]
