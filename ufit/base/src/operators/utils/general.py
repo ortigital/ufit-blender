@@ -1,5 +1,4 @@
 import os
-import copy
 import bpy
 import bmesh
 import math
@@ -443,12 +442,9 @@ def get_distance(v1, v2):
 def order_verts_by_closest(verts):
     if not verts:
         return []
-
     ordered_verts = []
-    non_ordered_verts = copy.deepcopy(verts)
-
+    non_ordered_verts = verts.copy()  # Более эффективное копирование
     ordered_verts.append(non_ordered_verts.pop(0))
-
     while non_ordered_verts:
         last_vert = ordered_verts[-1]
         distances = [get_distance(v, last_vert) for v in non_ordered_verts]
@@ -459,7 +455,7 @@ def order_verts_by_closest(verts):
     return ordered_verts
 
 
-def creat_path_by_points(cpath, points):
+def create_path_by_points(cpath, points):
     if cpath.type in ['NURBS', 'POLY']:
         cpath.points.add(len(points) - 1)
         for (index, point) in enumerate(points):
@@ -1013,7 +1009,6 @@ def filter_close_vertex_array(arr, rtol, atol):
     for value in arr[1:]:
         if not np.isclose(Vector(value), Vector(filtered_arr[-1]), rtol=rtol, atol=atol).all():
             filtered_arr.append(value)
-
     return filtered_arr
 
 

@@ -300,7 +300,7 @@ def create_cutout_path(context):
 
     points_for_path = [(v.x, v.y, v.z, 1) for v in filtered_verts]
 
-    general.creat_path_by_points(polyline, points_for_path)
+    general.create_path_by_points(polyline, points_for_path)
 
     return ufit_cutout_ob
 
