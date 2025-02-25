@@ -286,38 +286,38 @@ def add_circumference(context, i, z=0.0):
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.edge_face_add()
 
-    # name the circumference object
+    # Name the circumference object
     circum_obj = bpy.context.active_object
     circum_obj.name = f"Circum_{i}"
 
-    # lock to y direction movement
+    # Lock to y direction movement
     circum_obj.lock_location[0] = True
     circum_obj.lock_location[1] = True
 
-    # add a boolean modifier to find the intersection with the ufit object
+    # Add a boolean modifier to find the intersection with the ufit object
     general.activate_object(context, circum_obj, mode='OBJECT')
     boolean_mod = circum_obj.modifiers.new(name="Boolean", type="BOOLEAN")
     boolean_mod.operation = 'INTERSECT'
     boolean_mod.solver = 'FAST'
     boolean_mod.object = measure_obj
 
-    # set the origin to the median point of the object
+    # Set the origin to the median point of the object
     bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
 
-    # add limit location constraint
+    # Add limit location constraint
     limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
     limit_loc.use_min_z = True
     limit_loc.use_max_z = True
     limit_loc.use_transform_limit = True
     limit_loc.min_z, limit_loc.max_z = get_min_max_z(measure_obj)
 
-    # adding offset
+    # Adding offset
     # 0.01 - 1cm
     step = 0.001
     limit_loc.min_z = snappedc(limit_loc.min_z, step) + step
     limit_loc.max_z = snappedf(limit_loc.max_z, step) - step
 
-    # set the move tool
+    # Set the move tool
     bpy.ops.wm.tool_set_by_id(name="builtin.move")
 
 
@@ -329,26 +329,30 @@ def apply_circumference(context):
     # ONLY APPLIES ONE AT THE TIME (for-loop breaks!)
     for obj in bpy.data.objects:
         if "Circum_" in obj.name and obj.modifiers:
-            # bug in blender - you have to use an override to apply the modifier
+            # Проверка наличия модификатора Boolean
+            if "Boolean" not in obj.modifiers:
+                continue
+
+            # Bug in Blender - you have to use an override to apply the modifier
             override = {"object": obj, "active_object": obj}
             bpy.ops.object.modifier_apply(override, modifier="Boolean")
 
-            # get the z coord
+            # Get the z coord
             z_coord = obj.location.z
 
-            # get the circumference
+            # Get the circumference
             general.activate_object(context, obj, mode='EDIT')
             circumference = general.get_mesh_circumference(obj)
             general.activate_object(context, obj, mode='OBJECT')
 
-            # move the origin of the object back to the median point (origin is dislocated after boolean operator)
-            # completely changes the location of the object. Perform this after storing the z-ix
+            # Move the origin of the object back to the median point (origin is dislocated after boolean operator)
+            # Completely changes the location of the object. Perform this after storing the z-ix
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
 
-            # scale so that the object is visible
+            # Scale so that the object is visible
             obj.scale = (1.01, 1.01, 1.0)
 
-            # apply transformations (resets origin of object to center of world!)
+            # Apply transformations (resets origin of object to center of world!)
             general.apply_transform(obj, use_location=True, use_rotation=True, use_scale=True)
 
             break
@@ -366,9 +370,20 @@ def calc_circumferences(context, z_coord, circumference, distance=0.02):
     i = 0
     new_z_coord = z_coord
     new_circum = circumference
+
+    # Инициализация массивов, если они не существуют
+    if not hasattr(context.scene, 'ufit_circum_z_ixs'):
+        context.scene.ufit_circum_z_ixs = []
+    if not hasattr(context.scene, 'ufit_circumferences'):
+        context.scene.ufit_circumferences = []
     while new_circum > 0.025:
-        context.scene.ufit_circum_z_ixs[i] = new_z_coord
-        context.scene.ufit_circumferences[i] = new_circum
+        # Добавляем новые элементы в массивы, если индекс выходит за пределы
+        if i >= len(context.scene.ufit_circum_z_ixs):
+            context.scene.ufit_circum_z_ixs.append(new_z_coord)
+            context.scene.ufit_circumferences.append(new_circum)
+        else:
+            context.scene.ufit_circum_z_ixs[i] = new_z_coord
+            context.scene.ufit_circumferences[i] = new_circum
         i += 1
 
         new_z_coord -= distance
