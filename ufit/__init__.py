@@ -51,13 +51,15 @@ for mod in modulesNames:
     modules_full_names[mod] = ('{}.{}'.format(__name__, mod))
 
 
-# Переопределяем importlib.reload
+# Override importlib.reload
 _original_reload = importlib.reload
+
 
 def patched_reload(module):
     result = _original_reload(module)
     patch()
     return result
+
 
 importlib.reload = patched_reload
 
