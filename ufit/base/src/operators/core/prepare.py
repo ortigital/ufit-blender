@@ -260,29 +260,29 @@ def get_min_max(obj, axis: str):
         raise ValueError("Object isn't a mesh or does not exist.")
 
 
-# Глобальная переменная для отслеживания состояния обработчика
+# Global variable for tracking handler state
 circumference_monitor_active = True
 
 
-# Функция для регистрации обработчика
+# Function for registering a handler
 def register_circumference_monitor():
     if monitor_circumference not in bpy.app.handlers.depsgraph_update_post:
         bpy.app.handlers.depsgraph_update_post.append(monitor_circumference)
         print("Circumference monitor registered.")
 
 
-# Функция для удаления обработчика
+# Function to remove handler
 def unregister_circumference_monitor():
     if monitor_circumference in bpy.app.handlers.depsgraph_update_post:
         bpy.app.handlers.depsgraph_update_post.remove(monitor_circumference)
         print("Circumference monitor unregistered.")
 
 
-# Обработчик для мониторинга изменений
+# Handler for monitoring changes
 def monitor_circumference(scene):
     global circumference_monitor_active
 
-    # Проверяем, активен ли обработчик
+    # Checking if the handler is active
     if not circumference_monitor_active:
         return
 
@@ -290,47 +290,47 @@ def monitor_circumference(scene):
         # Отключаем обработчик во время выполнения
         circumference_monitor_active = False
 
-        # Проверяем существование первой окружности
+        # Disabling the handler during execution
         if "Circum_0" not in bpy.data.objects:
             print("Circum_0 does not exist in the scene.")
             return
 
         circum_obj = bpy.data.objects["Circum_0"]
 
-        # Проверяем наличие модификатора Boolean
+        # Checking for the presence of the Boolean modifier
         if "Boolean" not in circum_obj.modifiers:
             print("Boolean modifier is missing on Circum_0.")
             return
 
-        # Сохраняем текущее состояние выделения объектов
+        # Save the current state of object selection
         selected_objects = [obj for obj in bpy.context.selected_objects]
         active_object = bpy.context.view_layer.objects.active
 
-        # Создание временной копии для применения модификатора
+        # Create a temporary copy to apply a modifier to
         temp_obj = apply_boolean_modifier(circum_obj)
         if temp_obj is None:
             print("Failed to apply Boolean modifier for Circum_0.")
             return
 
-        # Переключение в режим редактирования для временного объекта
+        # Switching to edit mode for a temporary object
         general.activate_object(bpy.context, temp_obj, mode='EDIT', hide_select_all=False)
 
-        # Вычисляем длину окружности
+        # Calculate the circumference
         circumference = general.get_mesh_circumference(temp_obj)
         if circumference is None:
             print("Failed to calculate circumference for Circum_0.")
             return
 
-        # Выводим результат в консоль
-        print(f"Circumference of Circum_0: {circumference:.4f}")
+        # We output the result to the console
+        print(f"Circumference of Circum_0: {circumference*100.0:.2f} cm")
 
-        # Вернуться в режим объекта
+        # Return to object mode
         general.activate_object(bpy.context, temp_obj, mode='OBJECT', hide_select_all=False)
 
-        # Удаляем временную копию
+        # Delete the temporary copy
         bpy.data.objects.remove(temp_obj, do_unlink=True)
 
-        # Восстанавливаем предыдущее состояние выделения объектов
+        # Restore the previous state of object selection
         bpy.context.view_layer.objects.active = active_object
         for obj in bpy.data.objects:
             if obj in selected_objects:
@@ -339,26 +339,26 @@ def monitor_circumference(scene):
                 obj.select_set(False)
 
     finally:
-        # Включаем обработчик обратно
+        # Turn the handler back on
         circumference_monitor_active = True
 
 
-# Функция для применения модификатора Boolean на временном объекте
+# Function to apply a Boolean modifier to a temporary object
 def apply_boolean_modifier(obj):
-    # Создание копии объекта
+    # Creating a copy of an object
     temp_obj = obj.copy()
     temp_obj.data = obj.data.copy()
     temp_obj.name = f"{obj.name}_temp"
     bpy.context.collection.objects.link(temp_obj)
 
-    # Активация временного объекта
+    # Activating a temporary object
     bpy.context.view_layer.objects.active = temp_obj
     temp_obj.select_set(True)
 
-    # Переключение в режим объекта (на всякий случай)
+    # Switch to object mode (just in case)
     bpy.ops.object.mode_set(mode='OBJECT')
 
-    # Применение модификатора Boolean
+    # Using the Boolean Modifier
     if "Boolean" in temp_obj.modifiers:
         override = {"object": temp_obj, "active_object": temp_obj}
         try:
@@ -368,11 +368,11 @@ def apply_boolean_modifier(obj):
             bpy.data.objects.remove(temp_obj, do_unlink=True)
             return None
 
-    # Возвращаем временный объект
+    # Returning a temporary object
     return temp_obj
 
 
-# Модификация функции add_circumference для автоматической регистрации обработчика
+# Modifying the add_circumference function to automatically register a handler
 def add_circumference(context, i, z=0.0):
     measure_obj = bpy.data.objects['uFit']
     if 'uFit_Measure' in bpy.data.objects:
@@ -418,12 +418,12 @@ def add_circumference(context, i, z=0.0):
     # Set the move tool
     bpy.ops.wm.tool_set_by_id(name="builtin.move")
 
-    # Если это первая окружность, регистрируем обработчик
+    # If this is the first circle, register the handler
     if i == 0:
         register_circumference_monitor()
 
 
-# Убедитесь, что обработчик удаляется при деактивации аддона
+# Make sure the handler is removed when the addon is deactivated
 def unregister():
     unregister_circumference_monitor()
 
@@ -437,7 +437,6 @@ def apply_circumference(context):
     # ONLY APPLIES ONE AT THE TIME (for-loop breaks!)
     for obj in bpy.data.objects:
         if "Circum_" in obj.name and obj.modifiers:
-            # Проверка наличия модификатора Boolean
             if "Boolean" not in obj.modifiers:
                 continue
 
@@ -479,13 +478,11 @@ def calc_circumferences(context, z_coord, circumference, distance=0.02):
     new_z_coord = z_coord
     new_circum = circumference
 
-    # Инициализация массивов, если они не существуют
     if not hasattr(context.scene, 'ufit_circum_z_ixs'):
         context.scene.ufit_circum_z_ixs = []
     if not hasattr(context.scene, 'ufit_circumferences'):
         context.scene.ufit_circumferences = []
     while new_circum > 0.025:
-        # Добавляем новые элементы в массивы, если индекс выходит за пределы
         if i >= len(context.scene.ufit_circum_z_ixs):
             context.scene.ufit_circum_z_ixs.append(new_z_coord)
             context.scene.ufit_circumferences.append(new_circum)
