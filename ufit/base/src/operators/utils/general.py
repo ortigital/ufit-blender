@@ -9,6 +9,22 @@ from .....base.src.base_constants import base_path_consts
 from .....config_ufit import logger
 
 
+def get_min_max(obj, axis: str):
+    """
+    Return min and max coordinate for given axis of an object.
+    :param obj: Mesh Object.
+    :param axis: Axis ('x', 'y', or 'z').
+    :return: Tuple (min_val, max_val).
+    """
+    if obj and obj.type == 'MESH':
+        mesh = obj.data
+        axis_index = {'x': 0, 'y': 1, 'z': 2}[axis]
+        coords = [v.co[axis_index] for v in mesh.vertices]
+        return min(coords), max(coords)
+    else:
+        raise ValueError("Object isn't a mesh or does not exist.")
+
+
 def poll_object_object_mode(context, object_name):
     # check if there is an object and a vertex selected
     active_object = context.active_object

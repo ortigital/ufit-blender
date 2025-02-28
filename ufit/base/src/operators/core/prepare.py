@@ -244,22 +244,6 @@ def prep_circumferences(context):
     pass
 
 
-def get_min_max(obj, axis: str):
-    """
-    Return min and max coordinate for given axis of an object.
-    :param obj: Mesh Object.
-    :param axis: Axis ('x', 'y', or 'z').
-    :return: Tuple (min_val, max_val).
-    """
-    if obj and obj.type == 'MESH':
-        mesh = obj.data
-        axis_index = {'x': 0, 'y': 1, 'z': 2}[axis]
-        coords = [v.co[axis_index] for v in mesh.vertices]
-        return min(coords), max(coords)
-    else:
-        raise ValueError("Object isn't a mesh or does not exist.")
-
-
 # Global variable for tracking handler state
 circumference_monitor_active = True
 
@@ -322,7 +306,7 @@ def monitor_circumference(scene):
             return
 
         # We output the result to the console
-        print(f"Circumference of Circum_0: {circumference*100.0:.2f} cm")
+        print(f"Circumference of Circum_0: {circumference*100.0:.2f} cm at Z:{temp_obj.location.z*100}")
 
         # Return to object mode
         general.activate_object(bpy.context, temp_obj, mode='OBJECT', hide_select_all=False)
@@ -408,7 +392,7 @@ def add_circumference(context, i, z=0.0):
     limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
     limit_loc.use_transform_limit = True
     step = 0.001  # Adding offset
-    min_z, max_z = get_min_max(measure_obj, 'z')
+    min_z, max_z = general.get_min_max(measure_obj, 'z')
     limit_loc.use_min_z = limit_loc.use_max_z = True
     limit_loc.min_z = ceil(min_z / step) * step + step
     limit_loc.max_z = floor(max_z / step) * step - step
@@ -421,11 +405,6 @@ def add_circumference(context, i, z=0.0):
     # If this is the first circle, register the handler
     if i == 0:
         register_circumference_monitor()
-
-
-# Make sure the handler is removed when the addon is deactivated
-def unregister():
-    unregister_circumference_monitor()
 
 
 # You cannot immediately apply after adding circumference because the user first moves it to the correct position

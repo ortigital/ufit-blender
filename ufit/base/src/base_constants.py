@@ -68,7 +68,15 @@ base_operator_consts = {
         'checkpoint': None,
         'next_step': None
     },
+    'add_circumference': {
+        'checkpoint': None,
+        'next_step': None
+    },
     'circumference_lenght': {
+        'checkpoint': None,
+        'next_step': None
+    },
+    'delete_circumference': {
         'checkpoint': None,
         'next_step': None
     },

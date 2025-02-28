@@ -25,7 +25,6 @@ def update_progress(context, step, workflow):
 
 def set_active_step(context, step, path_consts, ui_consts, exec_save=True):
     bpy.types.Scene.ufit_active_step = step
-
     if exec_save:
         # workaround to undo the history after each step
         file_path = f'{context.scene.ufit_folder_checkpoints}/{context.scene.ufit_scan_filename}.blend'
