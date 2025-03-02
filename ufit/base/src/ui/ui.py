@@ -5,7 +5,7 @@ from .UI_steps_checkpoints import UIAssistance, UICheckpoints, UIProgress
 from .UI_view import UIUFitGizmo, UIUFitView
 from .UI_errors import UIReportProblem, UIErrorMessage
 from .UI_device_type import UIDeviceType
-from .UI_circumference_lenght import UICircumferenceLenght
+from .UI_circumference_length import UICircumferenceLenght
 
 
 def register():

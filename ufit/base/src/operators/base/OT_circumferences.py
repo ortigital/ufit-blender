@@ -8,7 +8,7 @@ class OTCircumference(OTBase):
     @classmethod
     def poll(cls, context):
         for obj in bpy.data.objects:
-            if obj.name.startswith("Circum_"):
+            if obj.name.startswith("Circum_"):  # or obj.name == 'Temp_circumference':
                 return False
         return True
 

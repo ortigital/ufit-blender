@@ -52,5 +52,8 @@ install_plugins_blender.sh
 
 # ignore ufit.ini
 ufit/ufit.ini
-
 ufit/patches/__init__.py
+ufit/ufit.example.ini
+ufit/ufit.ini
+.run/
+install_*
