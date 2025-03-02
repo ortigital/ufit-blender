@@ -17,8 +17,8 @@ base_ui_consts = {
         'ufit_gizmo': {
             'ui_name': 'View Modes'
         },
-        'circumference_lenght': {
-            'ui_name': 'Circumference Lenght'
+        'circumference_length': {
+            'ui_name': 'Circumference Length'
         },
         'checkpoints': {
             'ui_name': 'Checkpoints'
@@ -72,7 +72,7 @@ base_operator_consts = {
         'checkpoint': None,
         'next_step': None
     },
-    'circumference_lenght': {
+    'circumference_length': {
         'checkpoint': None,
         'next_step': None
     },

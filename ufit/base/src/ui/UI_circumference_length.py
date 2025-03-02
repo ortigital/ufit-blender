@@ -3,9 +3,9 @@ from ..base_constants import base_ui_consts
 from .utils.general import UFitPanel
 
 
-class UICircumferenceLenght(UFitPanel, bpy.types.Panel):
-    bl_idname = "VIEW3D_PT_circumference_lenght"
-    bl_label = base_ui_consts['persistent']['circumference_lenght']['ui_name']
+class UICircumferenceLength(UFitPanel, bpy.types.Panel):
+    bl_idname = "VIEW3D_PT_circumference_length"
+    bl_label = base_ui_consts['persistent']['circumference_length']['ui_name']
     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod

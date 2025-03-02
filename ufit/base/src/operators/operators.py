@@ -5,7 +5,7 @@ from .OT_gizmo import OTuFitGizmo
 from .OT_errors import OTReportProblem
 from .OT_device_type import OTDeviceType
 from .OT_restart import OTRestart
-# from .OT_circumference_length import OTCircumferenceLenght, OTAddCircumference, OTDeleteCircumference
+# from .OT_circumference_length import OTCircumferenceLength, OTAddCircumference, OTDeleteCircumference
 
 
 def register():
@@ -16,7 +16,7 @@ def register():
     bpy.utils.register_class(OTReportProblem)
     bpy.utils.register_class(OTDeviceType)
     bpy.utils.register_class(OTRestart)
-    # bpy.utils.register_class(OTCircumferenceLenght)
+    # bpy.utils.register_class(OTCircumferenceLength)
     # bpy.utils.register_class(OTAddCircumference)
     # bpy.utils.register_class(OTDeleteCircumference)
 
