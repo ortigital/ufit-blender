@@ -10,8 +10,10 @@ class UICircumferenceLength(UFitPanel, bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.ufit_active_step not in ['platform_login', 'device_type', 'start', 'verify_clean_up', 'clean_up', 'rotate', 'import_scan'] \
-            and not context.scene.ufit_circums_highlighted
+        return (
+                context.scene.ufit_active_step not in ['platform_login', 'device_type', 'start', 'indicate', 'verify_clean_up', 'clean_up', 'rotate', 'import_scan']
+                and not context.scene.ufit_circums_highlighted
+        )
 
     def draw(self, context):
         layout = self.layout
