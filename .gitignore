@@ -49,11 +49,14 @@ Thumbs.db
 # ignore offline installation script
 install_plugins_blender.bat
 install_plugins_blender.sh
+install_*.bat
+install_*.sh
+
+!install_plugins_blender_example.bat
+!install_plugins_blender_example.sh
 
 # ignore ufit.ini
 ufit/ufit.ini
+
+# ignore patches
 ufit/patches/__init__.py
-ufit/ufit.example.ini
-ufit/ufit.ini
-.run/
-install_*
