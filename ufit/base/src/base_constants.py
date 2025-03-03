@@ -20,6 +20,9 @@ base_ui_consts = {
         'circumference_length': {
             'ui_name': 'Circumference Length'
         },
+        'autocalculate_length': {
+            'ui_name': 'Autocalculate Length'
+        },
         'checkpoints': {
             'ui_name': 'Checkpoints'
         },
@@ -68,15 +71,11 @@ base_operator_consts = {
         'checkpoint': None,
         'next_step': None
     },
-    'add_circumference': {
-        'checkpoint': None,
-        'next_step': None
-    },
     'circumference_length': {
         'checkpoint': None,
         'next_step': None
     },
-    'delete_circumference': {
+    'track_mouse_position': {
         'checkpoint': None,
         'next_step': None
     },
