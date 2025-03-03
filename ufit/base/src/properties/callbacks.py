@@ -1,6 +1,3 @@
-from bpy_extras import view3d_utils
-from mathutils import Vector
-import blf
 import os
 import bpy
 import math
@@ -390,252 +387,180 @@ circumference_handler = None
 saved_mode = None
 
 
-def add_circumference(context, z=0.0):
-    if 'uFit' not in bpy.data.objects:
-        print("Error: Object 'uFit' not found.")
-        return
-    measure_obj = bpy.data.objects['uFit']
-    if 'uFit_Measure' in bpy.data.objects:
-        measure_obj = bpy.data.objects['uFit_Measure']
+# def add_circumference(context, z=0.0):
+#     if 'uFit' not in bpy.data.objects:
+#         print("Error: Object 'uFit' not found.")
+#         return
+#     measure_obj = bpy.data.objects['uFit']
+#     if 'uFit_Measure' in bpy.data.objects:
+#         measure_obj = bpy.data.objects['uFit_Measure']
 
-    # Сохраняем текущий активный объект
-    original_active_obj = context.view_layer.objects.active
+#     # Сохраняем текущий активный объект
+#     original_active_obj = context.view_layer.objects.active
 
-    try:
-        # Создаём временную окружность
-        bpy.ops.object.mode_set(mode='OBJECT')  # Убедимся, что мы в OBJECT mode
-        bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
-                                          scale=(1, 1, 1))
+#     try:
+#         # Создаём временную окружность
+#         bpy.ops.object.mode_set(mode='OBJECT')  # Убедимся, что мы в OBJECT mode
+#         bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
+#                                           scale=(1, 1, 1))
 
-        # Заполняем круг гранью
-        circum_obj = bpy.context.active_object
-        context.view_layer.objects.active = circum_obj  # Устанавливаем новый объект как активный
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.object.mode_set(mode='OBJECT')
+#         # Заполняем круг гранью
+#         circum_obj = bpy.context.active_object
+#         context.view_layer.objects.active = circum_obj  # Устанавливаем новый объект как активный
+#         bpy.ops.object.mode_set(mode='EDIT')
+#         bpy.ops.mesh.edge_face_add()
+#         bpy.ops.object.mode_set(mode='OBJECT')
 
-        # Настройка свойств окружности
-        circum_obj.name = "Temp_circumference"
-        circum_obj.lock_location[0] = True
-        circum_obj.lock_location[1] = True
+#         # Настройка свойств окружности
+#         circum_obj.name = "Temp_circumference"
+#         circum_obj.lock_location[0] = True
+#         circum_obj.lock_location[1] = True
 
-        # Добавляем модификатор Boolean
-        boolean_mod = circum_obj.modifiers.new(name="Boolean", type="BOOLEAN")
-        boolean_mod.operation = 'INTERSECT'
-        boolean_mod.solver = 'FAST'
-        boolean_mod.object = measure_obj
+#         # Добавляем модификатор Boolean
+#         boolean_mod = circum_obj.modifiers.new(name="Boolean", type="BOOLEAN")
+#         boolean_mod.operation = 'INTERSECT'
+#         boolean_mod.solver = 'FAST'
+#         boolean_mod.object = measure_obj
 
-        # Добавляем ограничение по оси Z
-        limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
-        limit_loc.use_transform_limit = True
-        step = 0.001  # Оффсет
-        min_z, max_z = general.get_min_max(measure_obj, 'z')
-        limit_loc.use_min_z = limit_loc.use_max_z = True
-        limit_loc.min_z = ceil(min_z / step) * step + step
-        limit_loc.max_z = floor(max_z / step) * step - step
-        limit_loc.use_min_x = limit_loc.use_max_x = False
-        limit_loc.use_min_y = limit_loc.use_max_y = False
+#         # Добавляем ограничение по оси Z
+#         limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
+#         limit_loc.use_transform_limit = True
+#         step = 0.001  # Оффсет
+#         min_z, max_z = general.get_min_max(measure_obj, 'z')
+#         limit_loc.use_min_z = limit_loc.use_max_z = True
+#         limit_loc.min_z = ceil(min_z / step) * step + step
+#         limit_loc.max_z = floor(max_z / step) * step - step
+#         limit_loc.use_min_x = limit_loc.use_max_x = False
+#         limit_loc.use_min_y = limit_loc.use_max_y = False
 
-        # Настройка центра масс и инструмента перемещения
-        bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
-        bpy.ops.wm.tool_set_by_id(name="builtin.move")
+#         # Настройка центра масс и инструмента перемещения
+#         bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
+#         bpy.ops.wm.tool_set_by_id(name="builtin.move")
 
-    finally:
-        # Восстанавливаем оригинальный активный объект
-        context.view_layer.objects.active = original_active_obj
-
-
-# Функция для удаления временной окружности
-def delete_circumference(context):
-    if "Temp_circumference" in bpy.data.objects:
-        bpy.data.objects.remove(bpy.data.objects["Temp_circumference"], do_unlink=True)
-        print("Temp_circumference has been deleted.")
+#     finally:
+#         # Восстанавливаем оригинальный активный объект
+#         context.view_layer.objects.active = original_active_obj
 
 
-# Функция для вычисления длины окружности
-def calc_circumference(context, z=0.0):
-    if 'uFit' not in bpy.data.objects:
-        print("Error: Object 'uFit' not found.")
-        return
-    measure_obj = bpy.data.objects['uFit']
-    if 'uFit_Measure' in bpy.data.objects:
-        measure_obj = bpy.data.objects['uFit_Measure']
-
-    original_active_obj = context.view_layer.objects.active
-    selected_objects = context.selected_objects
-
-    try:
-        bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
-                                          scale=(1, 1, 1))
-
-        circum_obj = bpy.context.active_object
-        context.view_layer.objects.active = circum_obj
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.edge_face_add()
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        circum_obj.lock_location[0] = True
-        circum_obj.lock_location[1] = True
-
-        boolean_mod = circum_obj.modifiers.new(name="Boolean", type="BOOLEAN")
-        boolean_mod.operation = 'INTERSECT'
-        boolean_mod.solver = 'FAST'
-        boolean_mod.object = measure_obj
-
-        override = {"object": circum_obj, "active_object": circum_obj}
-        bpy.ops.object.modifier_apply(override, modifier="Boolean")
-
-        bpy.ops.object.mode_set(mode='EDIT')
-        circumference = general.get_mesh_circumference(circum_obj)
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-        bpy.data.objects.remove(circum_obj, do_unlink=True)
-
-        print(f"Circumference at Z={z}: {circumference}")
-        return circumference
-    finally:
-        context.view_layer.objects.active = original_active_obj
-        for obj in selected_objects:
-            obj.select_set(True)
+# # Функция для удаления временной окружности
+# def delete_circumference(context):
+#     if "Temp_circumference" in bpy.data.objects:
+#         bpy.data.objects.remove(bpy.data.objects["Temp_circumference"], do_unlink=True)
+#         print("Temp_circumference has been deleted.")
 
 
-# Функция для постоянных вычислений
-def continuous_calc_circumference(scene):
-    global is_updating
-    if is_updating:
-        return
-    is_updating = True
+# # Функция для вычисления длины окружности
+# def calc_circumference(context, z=0.0):
+#     if 'uFit' not in bpy.data.objects:
+#         print("Error: Object 'uFit' not found.")
+#         return
+#     measure_obj = bpy.data.objects['uFit']
+#     if 'uFit_Measure' in bpy.data.objects:
+#         measure_obj = bpy.data.objects['uFit_Measure']
 
-    try:
-        # Проверяем, что временная окружность существует
-        if "Temp_circumference" in bpy.data.objects:
-            circum_obj = bpy.data.objects["Temp_circumference"]
-            z_position = circum_obj.location.z
+#     original_active_obj = context.view_layer.objects.active
+#     selected_objects = context.selected_objects
 
-            # Выполняем вычисления
-            circumference = calc_circumference(bpy.context, z=z_position)
+#     try:
+#         bpy.ops.object.mode_set(mode='OBJECT')
+#         bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
+#                                           scale=(1, 1, 1))
 
-            # Сохраняем результат в свойство сцены
-            bpy.context.scene.ufit_circumference_result = circumference
-    finally:
-        is_updating = False
+#         circum_obj = bpy.context.active_object
+#         context.view_layer.objects.active = circum_obj
+#         bpy.ops.object.mode_set(mode='EDIT')
+#         bpy.ops.mesh.edge_face_add()
+#         bpy.ops.object.mode_set(mode='OBJECT')
 
+#         circum_obj.lock_location[0] = True
+#         circum_obj.lock_location[1] = True
 
-def toggle_circumference(self, context):
-    global circumference_handler, saved_mode
+#         boolean_mod = circum_obj.modifiers.new(name="Boolean", type="BOOLEAN")
+#         boolean_mod.operation = 'INTERSECT'
+#         boolean_mod.solver = 'FAST'
+#         boolean_mod.object = measure_obj
 
-    if context.scene.ufit_circumference_toggle:
-        # Если галочка включена:
-        # 1. Сохраняем текущий режим
-        saved_mode = bpy.context.object.mode
+#         override = {"object": circum_obj, "active_object": circum_obj}
+#         bpy.ops.object.modifier_apply(override, modifier="Boolean")
 
-        # 2. Создаём окружность и регистрируем обработчик
-        if "Temp_circumference" not in bpy.data.objects:  # Проверяем, существует ли уже окружность
-            add_circumference(context)
+#         bpy.ops.object.mode_set(mode='EDIT')
+#         circumference = general.get_mesh_circumference(circum_obj)
+#         bpy.ops.object.mode_set(mode='OBJECT')
 
-        # Регистрируем обработчик, если он ещё не зарегистрирован
-        if circumference_handler is None or circumference_handler not in bpy.app.handlers.depsgraph_update_post:
-            circumference_handler = continuous_calc_circumference
-            bpy.app.handlers.depsgraph_update_post.append(circumference_handler)
+#         bpy.data.objects.remove(circum_obj, do_unlink=True)
 
-        # Устанавливаем режим OBJECT (требуется для работы с окружностью)
-        bpy.ops.object.mode_set(mode='OBJECT')
-
-    else:
-        # Если галочка выключена:
-        # 1. Удаляем окружность и обработчик
-        if "Temp_circumference" in bpy.data.objects:
-            delete_circumference(context)
-
-        # 2. Удаляем обработчик, если он был зарегистрирован
-        if circumference_handler is not None and circumference_handler in bpy.app.handlers.depsgraph_update_post:
-            bpy.app.handlers.depsgraph_update_post.remove(circumference_handler)
-            circumference_handler = None  # Сбрасываем ссылку на обработчик
-
-        # 3. Возвращаемся к сохранённому режиму (если он допустим)
-        if saved_mode:
-            try:
-                bpy.ops.object.mode_set(mode=saved_mode)
-            except RuntimeError:
-                # Если невозможно вернуться к предыдущему режиму,
-                # устанавливаем OBJECT mode по умолчанию
-                bpy.ops.object.mode_set(mode='OBJECT')
-        else:
-            # Если сохранённый режим недопустим, устанавливаем OBJECT mode
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        # Очищаем результат вычислений
-        context.scene.ufit_circumference_result = 0.0
+#         print(f"Circumference at Z={z}: {circumference}")
+#         return circumference
+#     finally:
+#         context.view_layer.objects.active = original_active_obj
+#         for obj in selected_objects:
+#             obj.select_set(True)
 
 
-# Обработчик отрисовки текста
-def draw_callback_px(self, context):
-    if not context.scene.display_mouse_position:
-        return
+# # Функция для постоянных вычислений
+# def continuous_calc_circumference(scene):
+#     global is_updating
+#     if is_updating:
+#         return
+#     is_updating = True
 
-    # Получаем текущую позицию мыши
-    mouse_x, mouse_y = self.mouse_position
+#     try:
+#         # Проверяем, что временная окружность существует
+#         if "Temp_circumference" in bpy.data.objects:
+#             circum_obj = bpy.data.objects["Temp_circumference"]
+#             z_position = circum_obj.location.z
 
-    # Получаем позицию Z через raycast
-    z_position = get_z_position_from_raycast(context, mouse_x, mouse_y) * 100.0
+#             # Выполняем вычисления
+#             circumference = calc_circumference(bpy.context, z=z_position)
 
-    # Создаем шейдер для отрисовки текста
-    font_id = 0
-    blf.size(font_id, 20, 72)  # Размер шрифта
-    text = f"Z: {z_position:.2f} m"
-
-    # Определяем позицию текста (немного выше курсора)
-    text_x = mouse_x + 15
-    text_y = mouse_y + 15
-
-    # Рисуем текст
-    blf.position(font_id, text_x, text_y, 0)
-    blf.color(font_id, 1, 1, 1, 1)  # Цвет текста (белый)
-    blf.draw(font_id, text)
+#             # Сохраняем результат в свойство сцены
+#             bpy.context.scene.ufit_circumference_result = circumference
+#     finally:
+#         is_updating = False
 
 
-# Функция для получения Z-координаты через raycast
-def get_z_position_from_raycast(context, mouse_x, mouse_y):
-    region = context.region
-    rv3d = context.space_data.region_3d
+# def toggle_circumference(self, context):
+#     global circumference_handler, saved_mode
 
-    # Преобразуем позицию мыши в 3D-пространство
-    view_vector = region_2d_to_origin_3d(region, rv3d, (mouse_x, mouse_y))
-    ray_target = region_2d_to_vector_3d(region, rv3d, (mouse_x, mouse_y))
+#     if context.scene.ufit_circumference_toggle:
+#         # Если галочка включена:
+#         # 1. Сохраняем текущий режим
+#         saved_mode = bpy.context.object.mode
 
-    # Начальная точка raycast'а
-    origin = view_vector
-    direction = ray_target.normalized()
+#         # 2. Создаём окружность и регистрируем обработчик
+#         if "Temp_circumference" not in bpy.data.objects:  # Проверяем, существует ли уже окружность
+#             add_circumference(context)
 
-    # Raycast
-    result, location, normal, index, object, matrix = context.scene.ray_cast(
-        depsgraph=context.evaluated_depsgraph_get(),
-        origin=origin,
-        direction=direction
-    )
+#         # Регистрируем обработчик, если он ещё не зарегистрирован
+#         if circumference_handler is None or circumference_handler not in bpy.app.handlers.depsgraph_update_post:
+#             circumference_handler = continuous_calc_circumference
+#             bpy.app.handlers.depsgraph_update_post.append(circumference_handler)
 
-    if result:  # Если найдено пересечение
-        z_position = location.z  # Берем Z-координату точки пересечения
-    else:  # Если пересечений нет
-        # Вычисляем Z-координату на расстоянии 1 метр от камеры
-        target_point = origin + direction * 1.0
-        z_position = target_point.z
+#         # Устанавливаем режим OBJECT (требуется для работы с окружностью)
+#         bpy.ops.object.mode_set(mode='OBJECT')
 
-    return z_position
+#     else:
+#         # Если галочка выключена:
+#         # 1. Удаляем окружность и обработчик
+#         if "Temp_circumference" in bpy.data.objects:
+#             delete_circumference(context)
 
+#         # 2. Удаляем обработчик, если он был зарегистрирован
+#         if circumference_handler is not None and circumference_handler in bpy.app.handlers.depsgraph_update_post:
+#             bpy.app.handlers.depsgraph_update_post.remove(circumference_handler)
+#             circumference_handler = None  # Сбрасываем ссылку на обработчик
 
-# Вспомогательные функции для преобразования координат
-def region_2d_to_origin_3d(region, rv3d, coord):
-    return view3d_utils.region_2d_to_origin_3d(region, rv3d, coord)
+#         # 3. Возвращаемся к сохранённому режиму (если он допустим)
+#         if saved_mode:
+#             try:
+#                 bpy.ops.object.mode_set(mode=saved_mode)
+#             except RuntimeError:
+#                 # Если невозможно вернуться к предыдущему режиму,
+#                 # устанавливаем OBJECT mode по умолчанию
+#                 bpy.ops.object.mode_set(mode='OBJECT')
+#         else:
+#             # Если сохранённый режим недопустим, устанавливаем OBJECT mode
+#             bpy.ops.object.mode_set(mode='OBJECT')
 
-
-def region_2d_to_vector_3d(region, rv3d, coord):
-    return view3d_utils.region_2d_to_vector_3d(region, rv3d, coord)
-
-# Функция для обновления состояния отображения
-
-
-def toggle_display(self, context):
-    if context.scene.display_mouse_position:
-        bpy.ops.wm.track_mouse_position('INVOKE_DEFAULT')
+#         # Очищаем результат вычислений
+#         context.scene.ufit_circumference_result = 0.0

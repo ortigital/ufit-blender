@@ -213,23 +213,12 @@ def register():
     bpy.types.Scene.ufit_circums_highlighted = BoolProperty(name='Circumferences Highlighted', default=False)
     bpy.types.Scene.ufit_circums_distance = FloatProperty(name="Distance", min=0.001, max=float("inf"), step=0.01,
                                                           default=0.05, subtype="DISTANCE", unit="LENGTH")
-    bpy.types.Scene.ufit_circumference_result = FloatProperty(name="Circumference Result",
-                                                              description="Result of the circumference calculation",
-                                                              min=0.0, max=float("inf"), step=0.01, default=0.01,
-                                                              precision=4)
-
-    # bpy.types.Scene.ufit_circumference_toggle = BoolProperty(
-    #     name="Calculate Circumference",
-    #     description="Toggle to calculate circumference dynamically",
-    #     default=False,
-    #     update=callbacks.toggle_circumference  # Обработчик изменения
-    # )
-
+    from ..operators.OT_autocalculate_length import toggle_display
     bpy.types.Scene.display_mouse_position = BoolProperty(
         name="Display Mouse Position",
         description="Display mouse position near the cursor",
         default=False,
-        update=callbacks.toggle_display
+        update=toggle_display
     )
 
     # sculpt
@@ -460,9 +449,7 @@ def unregister():
     del bpy.types.Scene.ufit_circumferences
     del bpy.types.Scene.ufit_circums_highlighted
     del bpy.types.Scene.ufit_circums_distance
-    del bpy.types.Scene.ufit_circumference_result
-    # del bpy.types.Scene.ufit_circumference_toggle
-    del bpy.types.Scene.show_mouse_position
+    del bpy.types.Scene.display_mouse_position
 
     # extrude/smooth regions
     del bpy.types.Scene.ufit_sculpt_mode

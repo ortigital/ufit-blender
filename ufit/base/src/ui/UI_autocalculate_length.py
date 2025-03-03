@@ -2,9 +2,8 @@ import bpy
 from ..base_constants import base_ui_consts
 from .utils.general import UFitPanel
 
+
 # Панель для управления отображением позиции мыши
-
-
 class MousePositionPanel(UFitPanel, bpy.types.Panel):
     bl_idname = "VIEW3D_PT_mouse_position"
     bl_label = base_ui_consts['persistent']['autocalculate_length']['ui_name']
