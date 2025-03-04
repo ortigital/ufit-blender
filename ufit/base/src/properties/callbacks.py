@@ -382,9 +382,9 @@ def enum_previews_for_assistance(self, context):
 ######################
 # calculation length #
 ######################
-is_updating = False
-circumference_handler = None
-saved_mode = None
+# is_updating = False
+# circumference_handler = None
+# saved_mode = None
 
 
 # def add_circumference(context, z=0.0):
