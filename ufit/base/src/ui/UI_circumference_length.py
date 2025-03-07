@@ -27,3 +27,4 @@ class UICircumferenceLength(UFitPanel, bpy.types.Panel):
             row2 = layout.row()
             row2.label(text="Circumference Result:")
             row2.prop(context.scene, "ufit_circumference_result", text="")
+        

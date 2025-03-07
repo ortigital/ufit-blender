@@ -361,6 +361,7 @@ def add_circumference(context, i, z=0.0):
     measure_obj = bpy.data.objects['uFit']
     if 'uFit_Measure' in bpy.data.objects:
         measure_obj = bpy.data.objects['uFit_Measure']
+    context.view_layer.objects.active=measure_obj
 
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
@@ -369,6 +370,7 @@ def add_circumference(context, i, z=0.0):
     # Fill the circle with a face
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.edge_face_add()
+    bpy.ops.object.mode_set(mode='OBJECT')
 
     # Name the circumference object
     circum_obj = bpy.context.active_object
@@ -403,8 +405,8 @@ def add_circumference(context, i, z=0.0):
     bpy.ops.wm.tool_set_by_id(name="builtin.move")
 
     # If this is the first circle, register the handler
-    if i == 0:
-        register_circumference_monitor()
+    # if i == 0:
+    #     register_circumference_monitor()
 
 
 # You cannot immediately apply after adding circumference because the user first moves it to the correct position
