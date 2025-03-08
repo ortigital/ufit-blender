@@ -558,36 +558,64 @@ def continuous_calc_circumference(scene):
 
 
 def toggle_circumference(self, context):
-    global circumference_handler, saved_mode
+    global circumference_handler, saved_mode, saved_active, saved_selected
 
     if context.scene.ufit_circumference_toggle:
-        active_obj = context.active_object
+        # Сохраняем текущее состояние
+        active_obj = bpy.data.objects["uFit"]
         if active_obj:
             saved_mode = active_obj.mode
         else:
             saved_mode = 'OBJECT'
+
+        # Сохраняем активный объект и выделенные объекты
+        saved_active = context.view_layer.objects.active
+        saved_selected = context.selected_objects.copy()
+
         if "TempObject" not in bpy.data.objects:
             add_circumference(context)
+
         if circumference_handler not in bpy.app.handlers.depsgraph_update_post:
             circumference_handler = continuous_calc_circumference
             bpy.app.handlers.depsgraph_update_post.append(circumference_handler)
+
         try:
             bpy.ops.object.mode_set(mode='OBJECT')
         except RuntimeError:
             pass
 
     else:
-        if circumference_handler is not None and circumference_handler in bpy.app.handlers.depsgraph_update_post:
+        if circumference_handler in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(circumference_handler)
             circumference_handler = None
+
         if "TempObject" in bpy.data.objects:
             delete_circumference(context)
-        if saved_mode and context.active_object:
+
+        # Восстанавливаем сохраненное состояние
+        if saved_active:
+            context.view_layer.objects.active = saved_active
+
+        if saved_selected:
+            for obj in saved_selected:
+                obj.select_set(True)
+            for obj in context.selected_objects:
+                if obj not in saved_selected:
+                    obj.select_set(False)
+
+        if saved_mode:
             try:
-                bpy.ops.object.mode_set(mode=saved_mode)
+                if context.active_object:
+                    bpy.ops.object.mode_set(mode=saved_mode)
+                else:
+                    saved_mode = 'OBJECT'
+                    bpy.ops.object.mode_set(mode='OBJECT')
             except RuntimeError:
                 bpy.ops.object.mode_set(mode='OBJECT')
         else:
             bpy.ops.object.mode_set(mode='OBJECT')
 
         context.scene.ufit_circumference_result = 0.0
+        saved_mode = None
+        saved_active = None
+        saved_selected = None
