@@ -425,11 +425,6 @@ def add_circumference(context, z=0.0):
     for coll in circum_obj.users_collection:
         coll.objects.unlink(circum_obj)
     new_collection.objects.link(circum_obj)
-
-    # Возвращаем uFit в активный объект и выделение
-    context.view_layer.objects.active = measure_obj
-    measure_obj.select_set(True)
-
     # Заполняем круг гранью (теперь активен TempObject)
     context.view_layer.objects.active = circum_obj
     circum_obj.select_set(True)
@@ -464,6 +459,8 @@ def add_circumference(context, z=0.0):
     context.view_layer.objects.active = circum_obj
     bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
     bpy.ops.wm.tool_set_by_id(name="builtin.move")
+    global global_prev_z
+    global_prev_z = circum_obj.location.z
 
 
 # Функция для удаления временной окружности
@@ -484,7 +481,6 @@ def calc_circumference(context, z=0.0):
         measure_obj = bpy.data.objects['uFit_Measure']
 
     original_active_obj = context.view_layer.objects.active
-    print("calc",original_active_obj)
     selected_objects = context.selected_objects
 
     try:
@@ -532,31 +528,31 @@ def calc_circumference(context, z=0.0):
         # Удаляем временный объект
         bpy.data.objects.remove(circum_obj, do_unlink=True)
 
-        print(f"Circumference at Z={z}: {circumference}")
+        print(f"calced circumference at Z={z}: {circumference}")
         return circumference
     finally:
         context.view_layer.objects.active = original_active_obj
         for obj in selected_objects:
             obj.select_set(True)
-
-# Функция для постоянных вычислений
+            
+global_prev_z = None
 def continuous_calc_circumference(scene):
-    global is_updating
+    global is_updating, global_prev_z
     if is_updating:
         return
     is_updating = True
 
     try:
-        # Проверяем, что временная окружность существует
-        if "TempObject" in bpy.data.objects:
-            circum_obj = bpy.data.objects["TempObject"]
-            z_position = circum_obj.location.z
+        if "TempObject" not in bpy.data.objects:
+            return
 
-            # Выполняем вычисления
-            circumference = calc_circumference(bpy.context, z=z_position)
+        circum_obj = bpy.data.objects["TempObject"]
+        current_z = circum_obj.location.z
 
-            # Сохраняем результат в свойство сцены
-            bpy.context.scene.ufit_circumference_result = circumference*100.0
+        if current_z != global_prev_z:
+            global_prev_z = current_z
+            circumference = calc_circumference(bpy.context, z=current_z)
+            scene.ufit_circumference_result = circumference * 100.0
     finally:
         is_updating = False
 
@@ -565,50 +561,33 @@ def toggle_circumference(self, context):
     global circumference_handler, saved_mode
 
     if context.scene.ufit_circumference_toggle:
-        # Сохраняем текущий режим, только если активный объект существует
         active_obj = context.active_object
         if active_obj:
             saved_mode = active_obj.mode
         else:
-            saved_mode = 'OBJECT'  # Устанавливаем безопасный режим по умолчанию
-
-        # 2. Создаём окружность и регистрируем обработчик
+            saved_mode = 'OBJECT'
         if "TempObject" not in bpy.data.objects:
             add_circumference(context)
-
-        # Регистрируем обработчик, если он ещё не зарегистрирован
-        if circumference_handler is None or circumference_handler not in bpy.app.handlers.depsgraph_update_post:
+        if circumference_handler not in bpy.app.handlers.depsgraph_update_post:
             circumference_handler = continuous_calc_circumference
             bpy.app.handlers.depsgraph_update_post.append(circumference_handler)
-
-        # Устанавливаем режим OBJECT (требуется для работы с окружностью)
         try:
             bpy.ops.object.mode_set(mode='OBJECT')
-        except RuntimeError:  # Если объекта нет, просто пропускаем
+        except RuntimeError:
             pass
 
     else:
-        # Если галочка выключена:
-        # 1. Удаляем окружность и обработчик
-        if "TempObject" in bpy.data.objects:
-            delete_circumference(context)
-
-        # 2. Удаляем обработчик, если он был зарегистрирован
         if circumference_handler is not None and circumference_handler in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(circumference_handler)
-            circumference_handler = None  # Сбрасываем ссылку на обработчик
-
-        # 3. Возвращаемся к сохранённому режиму (если он допустим)
-        if saved_mode:
+            circumference_handler = None
+        if "TempObject" in bpy.data.objects:
+            delete_circumference(context)
+        if saved_mode and context.active_object:
             try:
                 bpy.ops.object.mode_set(mode=saved_mode)
             except RuntimeError:
-                # Если невозможно вернуться к предыдущему режиму,
-                # устанавливаем OBJECT mode по умолчанию
                 bpy.ops.object.mode_set(mode='OBJECT')
         else:
-            # Если сохранённый режим недопустим, устанавливаем OBJECT mode
             bpy.ops.object.mode_set(mode='OBJECT')
 
-        # Очищаем результат вычислений
         context.scene.ufit_circumference_result = 0.0
