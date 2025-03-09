@@ -16,7 +16,7 @@ def register():
     bpy.utils.register_class(OTReportProblem)
     bpy.utils.register_class(OTDeviceType)
     bpy.utils.register_class(OTRestart)
-    bpy.utils.register_class(OTTrackMousePosition)
+    # bpy.utils.register_class(OTTrackMousePosition)
 
 
 def unregister():
@@ -27,4 +27,4 @@ def unregister():
     bpy.utils.unregister_class(OTReportProblem)
     bpy.utils.unregister_class(OTDeviceType)
     bpy.utils.unregister_class(OTRestart)
-    bpy.utils.unregister_class(OTTrackMousePosition)
+    # bpy.utils.unregister_class(OTTrackMousePosition)
