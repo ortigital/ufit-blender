@@ -80,6 +80,9 @@ You should now be able to debug your addon with breakpoints, variable inspection
 ## Troubleshooting
 
 - If breakpoints are not hitting, check that paths in `launch.json` match your actual addon installation path
+- In VS Code settings (Ctrl+,), verify:
+    - Set `debug.allowBreakpointsEverywhere` to `true` to allow breakpoints in any file
+    - Set `debug.showInlineBreakpointCandidates` to `true` to see where breakpoints can be placed
 - Ensure Blender is running with `--python-use-system-env` flag (this is handled by the launch scripts)
 - Verify the debugger server is running in Blender (check console output)
 - Make sure all required environment variables are set correctly in `.env`
