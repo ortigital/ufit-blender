@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Remote Attach",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/ufit",
+                    "remoteRoot": "<BLENDER_ADDONS_PATH>/ufit"
+                }
+            ]
+        },
+        {
+            "name": "Run install_plugin_launch_blender.sh",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/bin/bash",
+            "runtimeArgs": [
+                "${workspaceFolder}/install_plugin_launch_blender.sh"
+            ],
+            "console": "integratedTerminal"
+        }
+    ]
+}
