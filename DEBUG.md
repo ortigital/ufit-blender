@@ -87,3 +87,4 @@ You should now be able to debug your addon with breakpoints, variable inspection
 - Verify the debugger server is running in Blender (check console output)
 - Make sure all required environment variables are set correctly in `.env`
 - Confirm that `debugpy` is installed in your conda environment
+- In Blender, make sure `Preferences > Interface > Developer Extras` is enabled
