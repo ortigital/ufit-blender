@@ -228,7 +228,7 @@ def register():
         update=toggle_circumference
     )
     bpy.types.Scene.ufit_circumference_result = FloatProperty(name="Length", min=0.0, max=float("inf"), step=0.001,
-                                                          default=0.0)
+                                                              default=0.0)
 
     # sculpt
     bpy.types.Scene.ufit_sculpt_mode = EnumProperty(name="Mode", default=1,
@@ -460,7 +460,6 @@ def unregister():
     del bpy.types.Scene.ufit_circums_distance
     del bpy.types.Scene.ufit_circumference_toggle
     del bpy.types.Scene.ufit_circumference_result
-    del bpy.types.Scene.display_mouse_position
 
     # extrude/smooth regions
     del bpy.types.Scene.ufit_sculpt_mode
