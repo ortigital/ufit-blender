@@ -358,9 +358,16 @@ def apply_boolean_modifier(obj):
 
 # Modifying the add_circumference function to automatically register a handler
 def add_circumference(context, i, z=0.0):
+    if 'uFit' not in bpy.data.objects:
+        print("Error: Object 'uFit' not found.")
+        return
     measure_obj = bpy.data.objects['uFit']
     if 'uFit_Measure' in bpy.data.objects:
         measure_obj = bpy.data.objects['uFit_Measure']
+
+    # Устанавливаем uFit как активный и выделенный
+    context.view_layer.objects.active = measure_obj
+    measure_obj.select_set(True)
 
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
@@ -369,6 +376,7 @@ def add_circumference(context, i, z=0.0):
     # Fill the circle with a face
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.edge_face_add()
+    bpy.ops.object.mode_set(mode='OBJECT')
 
     # Name the circumference object
     circum_obj = bpy.context.active_object
