@@ -411,8 +411,8 @@ def add_circumference(context, i, z=0.0):
     bpy.ops.wm.tool_set_by_id(name="builtin.move")
 
     # If this is the first circle, register the handler
-    if i == 0:
-        register_circumference_monitor()
+    # if i == 0:
+    #     register_circumference_monitor()
 
 
 # You cannot immediately apply after adding circumference because the user first moves it to the correct position

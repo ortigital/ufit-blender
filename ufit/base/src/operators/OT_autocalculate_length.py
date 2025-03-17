@@ -4,13 +4,11 @@ import bmesh
 import blf
 
 
-
 # Глобальные переменные
 z_position = 0.0
 perimeter = 0.0
 circumference_handler = None
 is_updating = False
-
 
 
 # Функция для получения Z-координаты через raycast
@@ -106,11 +104,10 @@ def calculate_perimeter_at_z(context, z_position):
 
     # Вычисление периметра
     circumference = get_mesh_circumference(circum_obj)
-    print("Perimeter calculated:", circumference)
+    # print("Perimeter calculated:", circumference)
 
     # Удаление временного объекта
     bpy.data.objects.remove(circum_obj, do_unlink=True)
-    print("calced")
     return circumference
 
 
@@ -140,7 +137,7 @@ def draw_text(self, context):
 
     # Получаем Z-координату через raycast
     z_position = get_z_position_from_raycast(context, mouse_x, mouse_y)
-    print(z_position,"-",perimeter)
+    print(z_position, "-", perimeter)
     if z_position is None or perimeter is None:
         text = "Z: N/A, Perimeter: N/A"
     else:
