@@ -499,7 +499,7 @@ def get_curve_circumference(curve_ob):
     return circumference
 
 
-def get_mesh_circumference(obj):
+def get_mesh_circumference(obj) -> float:
     # get bmesh
     me = obj.data
     bm = bmesh.from_edit_mesh(me)

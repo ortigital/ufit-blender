@@ -1,9 +1,9 @@
-from functools import partial, wraps
-import time
-import os
+import traceback
+from typing import Optional
 import bpy
 import math
 import bpy.utils.previews
+from ufit.utils import ensure_mode, throttle
 from ..operators.utils import general, user_interface, color_attributes, nodes
 from ..operators.core import checkpoints
 from ..operators.core.sculpt import color_attr_select
@@ -391,36 +391,6 @@ saved_active = None
 saved_selected = None
 
 
-class TooSoon(Exception):
-    """Can't be called so soon"""
-    pass
-
-
-class CoolDownDecorator(object):
-    def __init__(self, func, interval):
-        self.func = func
-        self.interval = interval
-        self.last_run = 0
-
-    def __get__(self, obj, objtype=None):
-        if obj is None:
-            return self.func
-        return partial(self, obj)
-
-    def __call__(self, *args, **kwargs):
-        now = time.time()
-        if now - self.last_run >= self.interval:
-            self.last_run = now
-            return self.func(*args, **kwargs)
-
-
-def CoolDown(interval):
-    def applyDecorator(func):
-        decorator = CoolDownDecorator(func=func, interval=interval)
-        return wraps(func)(decorator)
-    return applyDecorator
-
-
 def add_circumference(context, z=0.0):
     if 'uFit' not in bpy.data.objects:
         print("Error: Object 'uFit' not found.")
@@ -505,12 +475,26 @@ def delete_circumference(context):
         print("TempObject has been deleted.")
 
 
-# Функция для вычисления длины окружности
-@CoolDown(0.85)
-def calc_circumference(context, z=0.0):
+@throttle(0.66)
+def calc_circumference(context, z=0.0) -> Optional[float]:
+    """
+    Calculate the circumference of the object.
+
+    :param context: The context of the operator.
+    :param z: The z-coordinate of the circumference.
+    :return: The circumference of the object.
+    """
+
+    print('CALL calc_circumference z = ', z)
+
+    if not hasattr(context, 'view_layer') or not hasattr(context, 'selected_objects') or not hasattr(context, 'active_object'):
+        print("Error: Invalid context.")
+        return None
+
     if 'uFit' not in bpy.data.objects:
         print("Error: Object 'uFit' not found.")
-        return
+        return None
+
     measure_obj = bpy.data.objects['uFit']
     if 'uFit_Measure' in bpy.data.objects:
         measure_obj = bpy.data.objects['uFit_Measure']
@@ -519,26 +503,27 @@ def calc_circumference(context, z=0.0):
     selected_objects = context.selected_objects
 
     try:
-        bpy.ops.object.mode_set(mode='OBJECT')
+        # bpy.ops.object.mode_set(mode='OBJECT')
+        ensure_mode('OBJECT')
 
-        # Создание новой коллекции "Circumferences", если её нет
+        # Creation of new collection "Circumferences" if it doesn't exist
         collection_name = "Circumferences"
         if collection_name not in bpy.data.collections:
             new_collection = bpy.data.collections.new(collection_name)
-            context.scene.collection.children.link(new_collection)  # Добавляем коллекцию в сцену
+            context.scene.collection.children.link(new_collection)  # Add collection to the scene
         else:
             new_collection = bpy.data.collections[collection_name]
 
-        # Создаём временную окружность
+        # Create temporary circle
         bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
                                           scale=(1, 1, 1))
 
         circum_obj = bpy.context.active_object
 
-        # Добавляем объект в коллекцию "Circumferences" и удаляем из других коллекций
+        # Add object to "Circumferences" collection and remove from other collections
         for coll in circum_obj.users_collection:
-            coll.objects.unlink(circum_obj)  # Удаляем из старых коллекций
-        new_collection.objects.link(circum_obj)  # Добавляем в коллекцию "Circumferences"
+            coll.objects.unlink(circum_obj)  # Remove from old collections
+        new_collection.objects.link(circum_obj)  # Add to "Circumferences" collection
 
         context.view_layer.objects.active = circum_obj
         bpy.ops.object.mode_set(mode='EDIT')
@@ -560,20 +545,28 @@ def calc_circumference(context, z=0.0):
         circumference = general.get_mesh_circumference(circum_obj)
         bpy.ops.object.mode_set(mode='OBJECT')
 
-        # Удаляем временный объект
+        # Remove the temporary object
         bpy.data.objects.remove(circum_obj, do_unlink=True)
         return circumference
+    except BaseException as e:
+        print('ERROR BaseException calc_circumference', e)
+        print(traceback.format_exc())
+        return None
     finally:
+        # Reset objects to original state
+        print('FINALLY calc_circumference')
         context.view_layer.objects.active = original_active_obj
-        for obj in selected_objects:
-            obj.select_set(True)
+        if selected_objects is not None:
+            for obj in selected_objects:
+                obj.select_set(True)
 
 
 global_prev_z = None
 
 
+@throttle(0.66)
 def continuous_calc_circumference(scene):
-
+    print('CALL continuous_calc_circumference')
     try:
         if "TempObject" not in bpy.data.objects:
             return
@@ -581,13 +574,21 @@ def continuous_calc_circumference(scene):
         circum_obj = bpy.data.objects["TempObject"]
         current_z = circum_obj.location.z
         circumference = calc_circumference(bpy.context, z=current_z)
-        scene.ufit_circumference_result = circumference * 100.0
+        if circumference is not None:
+            scene.ufit_circumference_result = circumference * 100.0
+        else:
+            print("Warning: circumference calculation returned None")
     except ValueError as e:
-        print(e)
+        print('ERROR ValueError continuous_calc_circumference', e)
+        print(traceback.format_exc())
+    except BaseException as e:
+        print('ERROR continuous_calc_circumference', e)
 
 
 def toggle_circumference(self, context):
     global circumference_handler, saved_mode, saved_active, saved_selected
+
+    print('CALL toggle_circumference')
 
     if context.scene.ufit_circumference_toggle:
         # Сохраняем текущее состояние
