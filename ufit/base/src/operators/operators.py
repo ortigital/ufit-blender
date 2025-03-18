@@ -5,7 +5,7 @@ from .OT_gizmo import OTuFitGizmo
 from .OT_errors import OTReportProblem
 from .OT_device_type import OTDeviceType
 from .OT_restart import OTRestart
-from .OT_autocalculate_length import OTTrackMousePosition
+from .OT_circumference_length import OTCircumferenceLength
 
 
 def register():
@@ -16,7 +16,7 @@ def register():
     bpy.utils.register_class(OTReportProblem)
     bpy.utils.register_class(OTDeviceType)
     bpy.utils.register_class(OTRestart)
-    # bpy.utils.register_class(OTTrackMousePosition)
+    bpy.utils.register_class(OTCircumferenceLength)
 
 
 def unregister():
@@ -27,4 +27,4 @@ def unregister():
     bpy.utils.unregister_class(OTReportProblem)
     bpy.utils.unregister_class(OTDeviceType)
     bpy.utils.unregister_class(OTRestart)
-    # bpy.utils.unregister_class(OTTrackMousePosition)
+    bpy.utils.unregister_class(OTCircumferenceLength)

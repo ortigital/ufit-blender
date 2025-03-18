@@ -213,7 +213,7 @@ def register():
     bpy.types.Scene.ufit_circums_highlighted = BoolProperty(name='Circumferences Highlighted', default=False)
     bpy.types.Scene.ufit_circums_distance = FloatProperty(name="Distance", min=0.001, max=float("inf"), step=0.01,
                                                           default=0.05, subtype="DISTANCE", unit="LENGTH")
-    from .callbacks import toggle_circumference
+    from ..operators.OT_circumference_length import toggle_circumference
     bpy.types.Scene.ufit_circumference_toggle = BoolProperty(
         name="Display circum",
         description="Display circum",
