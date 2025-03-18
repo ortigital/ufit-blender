@@ -20,8 +20,8 @@ base_ui_consts = {
         'autocalculate_length': {
             'ui_name': 'Autocalculate Length'
         },
-         'circumference_length': {
-            'ui_name': 'circumference Length'
+        'circumference_length': {
+            'ui_name': 'Circumference Length'
         },
         'checkpoints': {
             'ui_name': 'Checkpoints'
