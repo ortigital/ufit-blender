@@ -14,7 +14,7 @@ circumference_handler = None
 saved_mode = None
 saved_active = None
 saved_selected = None
-global_prev_z = None
+global_prev_z = 0.0
 draw_handler = None  # Для хранения ссылки на обработчик отрисовки
 mouse_position = (0, 0)  # Текущая позиция мыши
 
@@ -103,7 +103,7 @@ def delete_circumference(context):
 
 
 # Вычисление окружности
-@throttle(0.66)
+# @throttle(0.66)
 def calc_circumference(context, z=0.0) -> Optional[float]:
     print('CALL calc_circumference z = ', z)
     if not hasattr(context, 'view_layer') or not hasattr(context, 'selected_objects') or not hasattr(context, 'active_object'):
@@ -193,6 +193,27 @@ def continuous_calc_circumference(scene):
         print('ERROR continuous_calc_circumference', e)
 
 
+been_moved = False
+
+
+def move_finished_handler(scene):
+    if "TempObject" in bpy.data.objects:
+        circum_obj = bpy.data.objects["TempObject"]
+        global global_prev_z, been_moved
+        current_z = circum_obj.location.z
+
+        # Проверяем, изменилось ли положение по Z
+        if global_prev_z == current_z and been_moved == True:
+            print("Move tool released, updating circumference...")
+            global_prev_z = current_z  # Обновляем предыдущее положение
+            circumference = calc_circumference(bpy.context, z=current_z)
+            scene.ufit_circumference_result = circumference * 100.0
+            draw_circumference_text(current_z, circumference)  # Отрисовываем текст на экране
+            been_moved = False
+        if global_prev_z != current_z:
+            been_moved = True
+
+
 # Переключение окружности
 def toggle_circumference(self, context):
     global circumference_handler, saved_mode, saved_active, saved_selected, draw_handler
@@ -215,6 +236,8 @@ def toggle_circumference(self, context):
         if circumference_handler not in bpy.app.handlers.depsgraph_update_post:
             circumference_handler = continuous_calc_circumference
             bpy.app.handlers.depsgraph_update_post.append(circumference_handler)
+        if move_finished_handler not in bpy.app.handlers.depsgraph_update_post:
+            bpy.app.handlers.depsgraph_update_post.append(move_finished_handler)
 
         try:
             ensure_mode('OBJECT')
@@ -229,6 +252,9 @@ def toggle_circumference(self, context):
         if circumference_handler in bpy.app.handlers.depsgraph_update_post:
             bpy.app.handlers.depsgraph_update_post.remove(circumference_handler)
             circumference_handler = None
+
+        if move_finished_handler in bpy.app.handlers.depsgraph_update_post:
+            bpy.app.handlers.depsgraph_update_post.remove(move_finished_handler)
 
         if "TempObject" in bpy.data.objects:
             delete_circumference(context)
