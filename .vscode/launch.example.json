@@ -27,7 +27,7 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Run iinstall_plugin_launch_blender.bat",
+            "name": "Run install_plugin_launch_blender.bat",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "C:\\Windows\\System32\\cmd.exe",
