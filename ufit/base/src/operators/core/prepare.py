@@ -1,4 +1,3 @@
-from math import floor, ceil
 import bpy
 from ..utils import annotations, general, user_interface, color_attributes
 
@@ -244,130 +243,10 @@ def prep_circumferences(context):
     pass
 
 
-# Global variable for tracking handler state
-circumference_monitor_active = True
-
-
-# Function for registering a handler
-def register_circumference_monitor():
-    if monitor_circumference not in bpy.app.handlers.depsgraph_update_post:
-        bpy.app.handlers.depsgraph_update_post.append(monitor_circumference)
-        print("Circumference monitor registered.")
-
-
-# Function to remove handler
-def unregister_circumference_monitor():
-    if monitor_circumference in bpy.app.handlers.depsgraph_update_post:
-        bpy.app.handlers.depsgraph_update_post.remove(monitor_circumference)
-        print("Circumference monitor unregistered.")
-
-
-# Handler for monitoring changes
-def monitor_circumference(scene):
-    global circumference_monitor_active
-
-    # Checking if the handler is active
-    if not circumference_monitor_active:
-        return
-
-    try:
-        # Отключаем обработчик во время выполнения
-        circumference_monitor_active = False
-
-        # Disabling the handler during execution
-        if "Circum_0" not in bpy.data.objects:
-            print("Circum_0 does not exist in the scene.")
-            return
-
-        circum_obj = bpy.data.objects["Circum_0"]
-
-        # Checking for the presence of the Boolean modifier
-        if "Boolean" not in circum_obj.modifiers:
-            print("Boolean modifier is missing on Circum_0.")
-            return
-
-        # Save the current state of object selection
-        selected_objects = [obj for obj in bpy.context.selected_objects]
-        active_object = bpy.context.view_layer.objects.active
-
-        # Create a temporary copy to apply a modifier to
-        temp_obj = apply_boolean_modifier(circum_obj)
-        if temp_obj is None:
-            print("Failed to apply Boolean modifier for Circum_0.")
-            return
-
-        # Switching to edit mode for a temporary object
-        general.activate_object(bpy.context, temp_obj, mode='EDIT', hide_select_all=False)
-
-        # Calculate the circumference
-        circumference = general.get_mesh_circumference(temp_obj)
-        if circumference is None:
-            print("Failed to calculate circumference for Circum_0.")
-            return
-
-        # We output the result to the console
-        print(f"Circumference of Circum_0: {circumference*100.0:.2f} cm at Z:{temp_obj.location.z*100}")
-
-        # Return to object mode
-        general.activate_object(bpy.context, temp_obj, mode='OBJECT', hide_select_all=False)
-
-        # Delete the temporary copy
-        bpy.data.objects.remove(temp_obj, do_unlink=True)
-
-        # Restore the previous state of object selection
-        bpy.context.view_layer.objects.active = active_object
-        for obj in bpy.data.objects:
-            if obj in selected_objects:
-                obj.select_set(True)
-            else:
-                obj.select_set(False)
-
-    finally:
-        # Turn the handler back on
-        circumference_monitor_active = True
-
-
-# Function to apply a Boolean modifier to a temporary object
-def apply_boolean_modifier(obj):
-    # Creating a copy of an object
-    temp_obj = obj.copy()
-    temp_obj.data = obj.data.copy()
-    temp_obj.name = f"{obj.name}_temp"
-    bpy.context.collection.objects.link(temp_obj)
-
-    # Activating a temporary object
-    bpy.context.view_layer.objects.active = temp_obj
-    temp_obj.select_set(True)
-
-    # Switch to object mode (just in case)
-    bpy.ops.object.mode_set(mode='OBJECT')
-
-    # Using the Boolean Modifier
-    if "Boolean" in temp_obj.modifiers:
-        override = {"object": temp_obj, "active_object": temp_obj}
-        try:
-            bpy.ops.object.modifier_apply(override, modifier="Boolean")
-        except RuntimeError as e:
-            print(f"Error applying Boolean modifier: {e}")
-            bpy.data.objects.remove(temp_obj, do_unlink=True)
-            return None
-
-    # Returning a temporary object
-    return temp_obj
-
-
-# Modifying the add_circumference function to automatically register a handler
 def add_circumference(context, i, z=0.0):
-    if 'uFit' not in bpy.data.objects:
-        print("Error: Object 'uFit' not found.")
-        return
     measure_obj = bpy.data.objects['uFit']
     if 'uFit_Measure' in bpy.data.objects:
         measure_obj = bpy.data.objects['uFit_Measure']
-
-    # Устанавливаем uFit как активный и выделенный
-    context.view_layer.objects.active = measure_obj
-    measure_obj.select_set(True)
 
     bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z),
@@ -376,17 +255,16 @@ def add_circumference(context, i, z=0.0):
     # Fill the circle with a face
     bpy.ops.object.mode_set(mode='EDIT')
     bpy.ops.mesh.edge_face_add()
-    bpy.ops.object.mode_set(mode='OBJECT')
 
-    # Name the circumference object
+    # name the circumference object
     circum_obj = bpy.context.active_object
     circum_obj.name = f"Circum_{i}"
 
-    # Lock to y direction movement
+    # lock to y direction movement
     circum_obj.lock_location[0] = True
     circum_obj.lock_location[1] = True
 
-    # Add a boolean modifier to find the intersection with the ufit object
+    # add a boolean modifier to find the intersection with the ufit object
     general.activate_object(context, circum_obj, mode='OBJECT')
     boolean_mod = circum_obj.modifiers.new(name="Boolean", type="BOOLEAN")
     boolean_mod.operation = 'INTERSECT'
@@ -396,57 +274,38 @@ def add_circumference(context, i, z=0.0):
     # Set the origin to the median point of the object
     bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS')
 
-    # Add limit location constraint (only for Z-axis)
-    limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
-    limit_loc.use_transform_limit = True
-    step = 0.001  # Adding offset
-    min_z, max_z = general.get_min_max(measure_obj, 'z')
-    limit_loc.use_min_z = limit_loc.use_max_z = True
-    limit_loc.min_z = ceil(min_z / step) * step + step
-    limit_loc.max_z = floor(max_z / step) * step - step
-    limit_loc.use_min_x = limit_loc.use_max_x = False
-    limit_loc.use_min_y = limit_loc.use_max_y = False
-
-    # Set the move tool
+    # set the move tool
     bpy.ops.wm.tool_set_by_id(name="builtin.move")
 
-    # If this is the first circle, register the handler
-    # if i == 0:
-    #     register_circumference_monitor()
 
-
-# You cannot immediately apply after adding circumference because the user first moves it to the correct position
+# you cannot immediately apply after adding circumference because the user first moves it to the correct position
 def apply_circumference(context):
-    unregister_circumference_monitor()
     z_coord = None
     circumference = None
 
     # ONLY APPLIES ONE AT THE TIME (for-loop breaks!)
     for obj in bpy.data.objects:
         if "Circum_" in obj.name and obj.modifiers:
-            if "Boolean" not in obj.modifiers:
-                continue
-
-            # Bug in Blender - you have to use an override to apply the modifier
+            # bug in blender - you have to use an override to apply the modifier
             override = {"object": obj, "active_object": obj}
             bpy.ops.object.modifier_apply(override, modifier="Boolean")
 
-            # Get the z coord
+            # get the z coord
             z_coord = obj.location.z
 
-            # Get the circumference
+            # get the circumference
             general.activate_object(context, obj, mode='EDIT')
             circumference = general.get_mesh_circumference(obj)
             general.activate_object(context, obj, mode='OBJECT')
 
-            # Move the origin of the object back to the median point (origin is dislocated after boolean operator)
-            # Completely changes the location of the object. Perform this after storing the z-ix
+            # move the origin of the object back to the median point (origin is dislocated after boolean operator)
+            # completely changes the location of the object. Perform this after storing the z-ix
             bpy.ops.object.origin_set(type='ORIGIN_CENTER_OF_MASS', center='MEDIAN')
 
-            # Scale so that the object is visible
+            # scale so that the object is visible
             obj.scale = (1.01, 1.01, 1.0)
 
-            # Apply transformations (resets origin of object to center of world!)
+            # apply transformations (resets origin of object to center of world!)
             general.apply_transform(obj, use_location=True, use_rotation=True, use_scale=True)
 
             break
@@ -464,18 +323,9 @@ def calc_circumferences(context, z_coord, circumference, distance=0.02):
     i = 0
     new_z_coord = z_coord
     new_circum = circumference
-
-    if not hasattr(context.scene, 'ufit_circum_z_ixs'):
-        context.scene.ufit_circum_z_ixs = []
-    if not hasattr(context.scene, 'ufit_circumferences'):
-        context.scene.ufit_circumferences = []
     while new_circum > 0.025:
-        if i >= len(context.scene.ufit_circum_z_ixs):
-            context.scene.ufit_circum_z_ixs.append(new_z_coord)
-            context.scene.ufit_circumferences.append(new_circum)
-        else:
-            context.scene.ufit_circum_z_ixs[i] = new_z_coord
-            context.scene.ufit_circumferences[i] = new_circum
+        context.scene.ufit_circum_z_ixs[i] = new_z_coord
+        context.scene.ufit_circumferences[i] = new_circum
         i += 1
 
         new_z_coord -= distance

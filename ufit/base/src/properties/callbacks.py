@@ -1,3 +1,4 @@
+import os
 import bpy
 import math
 import bpy.utils.previews
@@ -224,7 +225,7 @@ def voronoi_type_update(self, context):
 
 def draw_thickness_update(self, context):
     node_tree = bpy.data.node_groups['Voronoi Nodes Empty']
-    node_tree.nodes['ufit_extrude_node'].inputs[3].default_value = self.ufit_free_draw_thickness / 1000
+    node_tree.nodes['ufit_extrude_node'].inputs[3].default_value = self.ufit_free_draw_thickness/1000
 
 
 def solidify_thickness_update(self, context):
@@ -279,11 +280,11 @@ def flare_tool_update(self, context):
 
 
 def get_flare_height(self):
-    return bpy.context.tool_settings.proportional_size * 100
+    return bpy.context.tool_settings.proportional_size*100
 
 
 def set_flare_height(self, value):
-    bpy.context.tool_settings.proportional_size = value / 100
+    bpy.context.tool_settings.proportional_size = value/100
     self["flare_height"] = value
 
 

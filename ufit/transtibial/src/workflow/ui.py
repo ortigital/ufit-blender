@@ -19,6 +19,13 @@ from .ST_130_thickness.UI_thickness import UIThicknessTT
 from .ST_132_custom_thickness.UI_custom_thickness import UICustomThicknessTT
 from .ST_135_flare.UI_flare import UIFlareTT
 from .ST_140_verify_socket.UI_verify_socket import UIVerifySocketTT
+
+from .ST_145_Shell_bottom_edit.UI_shell_bottom_modifier import BottomVertexEditor
+from .ST_145_Shell_bottom_edit.UI_shell_bottom_modifier import APL_Squircle
+from .ST_145_Shell_bottom_edit.UI_shell_bottom_modifier import APL_Halfsphere
+from .ST_145_Shell_bottom_edit.UI_shell_bottom_modifier import OffsetOperator
+
+
 from .ST_150_import_connector.UI_import_connector import UIImportConnectorTT
 from .ST_160_align.UI_alignment import UIMoveConnectorTT
 from .ST_170_transition.UI_transition_connector import UITransitionConnectorTT
@@ -47,13 +54,17 @@ def register():
     bpy.utils.register_class(UIThicknessTT)
     bpy.utils.register_class(UICustomThicknessTT)
     bpy.utils.register_class(UIFlareTT)
-    bpy.utils.register_class(UIVerifySocketTT)
+    bpy.utils.register_class(UIVerifySocketTT)   
+    bpy.utils.register_class(BottomVertexEditor)
+    bpy.utils.register_class(OffsetOperator)
+    bpy.utils.register_class(APL_Squircle)
+    bpy.utils.register_class(APL_Halfsphere)
+    bpy.types.Scene.slider = bpy.props.PointerProperty(type = OffsetOperator)
     bpy.utils.register_class(UIImportConnectorTT)
     bpy.utils.register_class(UIMoveConnectorTT)
     bpy.utils.register_class(UITransitionConnectorTT)
     bpy.utils.register_class(UIExportSocketTT)
-    bpy.utils.register_class(UIFinishedTT)
-
+    bpy.utils.register_class(UIFinishedTT) 
 
 def unregister():
     bpy.utils.unregister_class(UIStartModelingTT)
@@ -77,8 +88,19 @@ def unregister():
     bpy.utils.unregister_class(UICustomThicknessTT)
     bpy.utils.unregister_class(UIFlareTT)
     bpy.utils.unregister_class(UIVerifySocketTT)
+    
+    bpy.utils.unregister_class(BottomVertexEditor)
+    bpy.utils.unregister_class(OffsetOperator)
+    del bpy.types.Scene.slider
+    bpy.utils.unregister_class(APL_Squircle)
+    bpy.utils.unregister_class(APL_Halfsphere)
+
+ 
+    
     bpy.utils.unregister_class(UIImportConnectorTT)
     bpy.utils.unregister_class(UIMoveConnectorTT)
     bpy.utils.unregister_class(UITransitionConnectorTT)
     bpy.utils.unregister_class(UIExportSocketTT)
     bpy.utils.unregister_class(UIFinishedTT)
+
+

@@ -127,7 +127,7 @@ def push_pull_region_circular(context, extrusion):
     bpy.context.scene.transform_orientation_slots[0].type = 'NORMAL'
 
     # perform proportional editing (extrusion)
-    bpy.ops.transform.translate(value=(0, 0, extrusion * 1.5),
+    bpy.ops.transform.translate(value=(0, 0, extrusion*1.5),
                                 orient_type='NORMAL',
                                 # orient_matrix=((-0.869072, 0.298615, -0.39439),
                                 #                (0.346459, -0.201653, -0.916135),
@@ -300,7 +300,7 @@ def create_cutout_path(context):
 
     points_for_path = [(v.x, v.y, v.z, 1) for v in filtered_verts]
 
-    general.create_path_by_points(polyline, points_for_path)
+    general.creat_path_by_points(polyline, points_for_path)
 
     return ufit_cutout_ob
 
@@ -326,8 +326,8 @@ def create_cutout_plane(context):
                                use_proportional_connected=False,
                                use_proportional_projected=False)
 
-        # Z_up not working in all cases, but minimum...
-        bpy.context.object.data.twist_mode = 'MINIMUM'
+        # Z_UP not working in all cases
+        bpy.context.object.data.twist_mode = 'Z_UP'
 
         # extrude the curve x cm everywhere
         bpy.context.object.data.extrude = 0.01
@@ -597,7 +597,7 @@ def perc_scaling(obj, liner_perc):
     # obj.scale.z = 1 + liner_perc  # do not scale in the z-direction
 
     # workaround to not use center of mass scaling (not ideal!)
-    general.move_object(obj, Vector((0, -liner_perc / 20, 0)))
+    general.move_object(obj, Vector((0, -liner_perc/20, 0)))
 
     # resets the object origin to the worlds origin
     general.apply_transform(obj, use_location=True, use_rotation=True, use_scale=True)
@@ -920,7 +920,7 @@ def flare(context):
     general.select_vertices_from_vertex_groups(context, ufit_obj, vg_names=vgs)
 
     # calculate the flare percentage
-    flare_perc = 1 + context.scene.ufit_flare_percentage / 100
+    flare_perc = 1 + context.scene.ufit_flare_percentage/100
 
     # flare
     bpy.ops.transform.resize(value=(flare_perc, flare_perc, 1),
@@ -938,3 +938,5 @@ def flare(context):
 
 def flare_done(context):
     bpy.context.scene.tool_settings.use_proportional_edit = False
+
+

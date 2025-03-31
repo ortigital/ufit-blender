@@ -192,11 +192,11 @@ def register():
 
     # import scan
     bpy.types.Scene.ufit_file_type = EnumProperty(name="File Type", default=2,
-                                                  items=[
-                                                      ("zip", ".zip", "", 1),
-                                                      ("obj", ".obj", "", 2),
-                                                      ("stl", ".stl", "", 3),
-                                                  ])
+                                                    items=[
+                                                        ("zip", ".zip", "", 1),
+                                                        ("obj", ".obj", "", 2),
+                                                        ("stl", ".stl", "", 3),
+                                                    ])
     bpy.types.Scene.ufit_scan_scale_size = FloatProperty(name="Scale Scan", min=0.001, max=1.000, step=1, precision=3,
                                                          default=0.001)
     bpy.types.Scene.ufit_colored_scan = BoolProperty(name='Colored Scan', default=True)
@@ -211,17 +211,12 @@ def register():
     bpy.types.Scene.ufit_sculpt_circumferences = FloatVectorProperty(name='Sculpt. Circumferences', size=max_num_circumferences)
     bpy.types.Scene.ufit_circumferences = FloatVectorProperty(name='Circumferences', size=max_num_circumferences)
     bpy.types.Scene.ufit_circums_highlighted = BoolProperty(name='Circumferences Highlighted', default=False)
-    bpy.types.Scene.ufit_circums_distance = FloatProperty(name="Distance", min=0.001, max=float("inf"), step=0.01,
-                                                          default=0.05, subtype="DISTANCE", unit="LENGTH")
-    from ..operators.OT_circumference_length import toggle_circumference
-    bpy.types.Scene.ufit_circumference_toggle = BoolProperty(
-        name="Display circum",
-        description="Display circum",
-        default=False,
-        update=toggle_circumference
-    )
-    bpy.types.Scene.ufit_circumference_result = FloatProperty(name="Length", min=0.0, max=float("inf"), step=0.001,
-                                                              default=0.0)
+    bpy.types.Scene.ufit_circums_distance = EnumProperty(name="Distance", default=2,
+                                                         items=[
+                                                             ("0.020", "20 mm", "", 1),
+                                                             ("0.030", "30 mm", "", 2),
+                                                             ("0.040", "40 mm", "", 3),
+                                                         ])
 
     # sculpt
     bpy.types.Scene.ufit_sculpt_mode = EnumProperty(name="Mode", default=1,
@@ -451,8 +446,6 @@ def unregister():
     del bpy.types.Scene.ufit_circumferences
     del bpy.types.Scene.ufit_circums_highlighted
     del bpy.types.Scene.ufit_circums_distance
-    del bpy.types.Scene.ufit_circumference_toggle
-    del bpy.types.Scene.ufit_circumference_result
 
     # extrude/smooth regions
     del bpy.types.Scene.ufit_sculpt_mode
