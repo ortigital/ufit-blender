@@ -1,21 +1,10 @@
 import math
-
 import bmesh
 import bpy
 import mathutils
-
+import .....utils
 from .base_constants import base_ui_consts
 from .general import UFitPanel
-
-
-def vertex_extremum_find(verts):
-    """
-    function is used to search highest and lowest vertices
-    in Ox, Oy and Oz planes
-    """
-    coords = [(v[0], v[1], v[2]) for v in verts]
-    x, y, z = zip(*coords)
-    return [min(x), max(x), min(y), max(y), min(z), max(z)]
 
 
 def find_center_coordinates(verts):
@@ -23,7 +12,7 @@ def find_center_coordinates(verts):
     function is used to find center, where should start a half-sphere
     from bottom of shell
     """
-    extremum = vertex_extremum_find(verts)
+    extremum = utils.vertex_extremum_find(verts)
     return mathutils.Vector((extremum[0] + ((extremum[1] - extremum[0]) / 2),
                              extremum[2] + ((extremum[3] - extremum[2]) / 2),
                              extremum[5]))
@@ -33,7 +22,7 @@ def find_radius(verts):
     """
     function is used to search radius length from center
     """
-    extremum = vertex_extremum_find(verts)
+    extremum = utils.vertex_extremum_find(verts)
     center = find_center_coordinates(verts)
     return (abs(extremum[1] - center[0]) + abs(extremum[3] - center[1])) / 2
 
