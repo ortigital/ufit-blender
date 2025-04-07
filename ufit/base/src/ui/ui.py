@@ -5,9 +5,6 @@ from .UI_steps_checkpoints import UIAssistance, UICheckpoints, UIProgress
 from .UI_view import UIUFitGizmo, UIUFitView
 from .UI_errors import UIReportProblem, UIErrorMessage
 from .UI_device_type import UIDeviceType
-# from .UI_autocalculate_length import MousePositionPanel
-from .UI_circumference_length import UICircumferenceLength
-
 
 def register():
     bpy.utils.register_class(UIUFitLogo)
@@ -20,8 +17,6 @@ def register():
     bpy.utils.register_class(UIProgress)
     bpy.utils.register_class(UIErrorMessage)
     bpy.utils.register_class(UIDeviceType)
-    # bpy.utils.register_class(MousePositionPanel)
-    bpy.utils.register_class(UICircumferenceLength)
 
 
 def unregister():
@@ -35,5 +30,4 @@ def unregister():
     bpy.utils.unregister_class(UIProgress)
     bpy.utils.unregister_class(UIErrorMessage)
     bpy.utils.unregister_class(UIDeviceType)
-    # bpy.utils.unregister_class(MousePositionPanel)
-    bpy.utils.unregister_class(UICircumferenceLength)
+
