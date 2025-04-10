@@ -1,7 +1,22 @@
-from functools import wraps
 import inspect
 import time
+from functools import wraps
+
 import bpy
+import mathutils
+
+
+def vertex_extremum_find(verts):
+    coords = [(v[0], v[1], v[2]) for v in verts]
+    x, y, z = zip(*coords)
+    return [min(x), max(x), min(y), max(y), min(z), max(z)]
+
+
+def find_center_coordinates(verts):
+    extremum = vertex_extremum_find(verts)
+    return mathutils.Vector((extremum[0] + ((extremum[1] - extremum[0]) / 2),
+                             extremum[2] + ((extremum[3] - extremum[2]) / 2),
+                             extremum[4] + ((extremum[5] - extremum[4]) / 2)))
 
 
 def ensure_mode(mode: bpy.ops._ModuleType) -> bool:
@@ -23,6 +38,7 @@ class ThrottleDecorator:
     Decorator that limits how often a function can be called.
     Only executes the function if enough time has passed since the last call.
     """
+
     def __init__(self, func, interval: float):
         self.func = func
         self.interval = interval

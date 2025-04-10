@@ -1,3 +1,5 @@
 bpy
 requests
 debugpy
+
+mathutils
