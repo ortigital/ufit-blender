@@ -77,7 +77,7 @@ def add_circumference(context, z=0.0):
     # Добавляем ограничение по оси Z
     limit_loc = circum_obj.constraints.new(type='LIMIT_LOCATION')
     limit_loc.use_transform_limit = True
-    step = 1.0
+    step = 0.001
     min_z, max_z = general.get_min_max(measure_obj, 'z')
     limit_loc.use_min_z = limit_loc.use_max_z = True
     limit_loc.min_z = ceil(min_z / step) * step + step
@@ -127,7 +127,7 @@ def calc_circumference(context, z=0.0) -> Optional[float]:
             new_collection = bpy.data.collections[collection_name]
 
         # Создаем временную окружность
-        bpy.ops.mesh.primitive_circle_add(radius=200, enter_editmode=False, align='WORLD', location=(0, 0, z), scale=(1, 1, 1))
+        bpy.ops.mesh.primitive_circle_add(radius=0.2, enter_editmode=False, align='WORLD', location=(0, 0, z), scale=(1, 1, 1))
         circum_obj = bpy.context.active_object
 
         # Добавляем объект в коллекцию "Circumferences"
@@ -183,7 +183,7 @@ def continuous_calc_circumference(scene):
         current_z = circum_obj.location.z
         circumference = calc_circumference(bpy.context, z=current_z)
         if circumference is not None:
-            scene.ufit_circumference_result = circumference * 1000.0
+            scene.ufit_circumference_result = circumference * 100.0
             draw_circumference_text(current_z, circumference)  # Отрисовываем текст на экране
         else:
             print("Warning: circumference calculation returned None")
@@ -207,7 +207,7 @@ def move_finished_handler(scene):
             print("Move tool released, updating circumference...")
             global_prev_z = current_z  # Обновляем предыдущее положение
             circumference = calc_circumference(bpy.context, z=current_z)
-            scene.ufit_circumference_result = circumference * 1000.0
+            scene.ufit_circumference_result = circumference * 100.0
             draw_circumference_text(current_z, circumference)  # Отрисовываем текст на экране
             been_moved = False
         if global_prev_z != current_z:
@@ -293,7 +293,7 @@ def draw_circumference_text(z, circumference):
     global mouse_position
     font_id = 0
     blf.size(font_id, 20, 72)  # Размер шрифта
-    text = f"Z: {z * 1000:.2f} mm, Circumference: {circumference * 1000:.2f} mm"
+    text = f"Z: {z * 100:.2f} cm, Circumference: {circumference * 100:.2f} cm"
 
     # Определяем позицию текста (немного выше курсора)
     text_x = mouse_position[0] + 15
@@ -339,7 +339,7 @@ def draw_text(context):
         blf.size(font_id, 20, 72)  # Размер шрифта
 
         # Формируем текст
-        text = f"Z: {z_position * 1000:.2f} mm, Circumference: {circumference * 1000:.2f} mm"
+        text = f"Z: {z_position * 100:.2f} cm, Circumference: {circumference * 100:.2f} cm"
 
         # Рисуем текст
         blf.position(font_id, text_x, text_y, 0)
