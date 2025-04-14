@@ -451,8 +451,8 @@ def activate_object(context, active_obj, mode='OBJECT', hide_select_all=True):
             bpy.ops.wm.context_set_value(data_path="space_data.show_region_tool_header", value='False')
 
 
-def get_distance(v1, v2):
-    return ((v1[0] - v2[0])**2 + (v1[1] - v2[1])**2)**0.5
+# def get_distance(v1, v2):
+    # return ((v1[0] - v2[0])**2 + (v1[1] - v2[1])**2)**0.5
 
 
 def order_verts_by_closest(verts):
