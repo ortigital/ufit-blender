@@ -68,6 +68,7 @@ ufit_scene_properties = [
     'ufit_smooth_factor',
     'ufit_push_pull_circular',
     'ufit_extrude_amount',
+     # 'ufit_radius_amount'
     'ufit_sculpt_brush',
 
     # cutout
@@ -242,6 +243,7 @@ def register():
     bpy.types.Scene.ufit_smooth_factor = IntProperty(name="Factor", min=0, max=50, step=1, default=15)
     bpy.types.Scene.ufit_push_pull_circular = BoolProperty(name="Circular Push/Pull", default=True)
     bpy.types.Scene.ufit_extrude_amount = FloatProperty(name="Amount", min=0, max=100.0, step=50, default=3.5)
+    # bpy.types.Scene.ufit_radius_amount = FloatProperty(name="RadAmount", min=-10.0, max=10.0, step=50, default=1.0)
     bpy.types.Scene.ufit_sculpt_brush = EnumProperty(name="Sculpting Tool", default=1,
                                                      items=[
                                                          ("push_brush", "Push", "", 1),
@@ -462,6 +464,7 @@ def unregister():
     del bpy.types.Scene.ufit_enable_colors
     del bpy.types.Scene.ufit_push_pull_circular
     del bpy.types.Scene.ufit_extrude_amount
+    # del bpy.types.Scene.ufit_radius_amount
     del bpy.types.Scene.ufit_sculpt_brush
 
     # cutout

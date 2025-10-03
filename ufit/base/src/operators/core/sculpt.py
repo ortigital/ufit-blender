@@ -4,6 +4,7 @@ import math
 from mathutils import Vector
 import numpy as np
 from ..utils import annotations, color_attributes, general, user_interface, nodes
+#from .....utils import find_center_coordinates, vertex_extremum_find, average_arifm
 
 color_attr_select = 'area_selection'
 
@@ -93,7 +94,7 @@ def push_pull_region(context, extrusion, exclude_vertex_groups=None):
     bpy.ops.mesh.vertices_smooth(factor=0.5, repeat=7)
 
 
-def push_pull_region_circular(context, extrusion):
+def push_pull_region_circular(context, extrusion, radammount):
     ufit_obj = bpy.data.objects['uFit']
 
     # select vertices by color attribute layer - exclude default color black
@@ -101,15 +102,20 @@ def push_pull_region_circular(context, extrusion):
 
     # get the selected vertices (indexes are ruined)
     selected_verts = general.get_selected_vertices(context)
+    #create_object_selectedverts(selected_verts)
     temp = np.array([(v['co'][0], v['co'][1], v['co'][2]) for v in selected_verts])
     center = Vector(np.sum(temp, axis=0) / temp.shape[0])
-
+    #create_center(center)
+    # center_vert = find_center_coordinates(temp)
     # get the closest vertex to the center and the furthest vertex from the center
     selected_verts.sort(reverse=False, key=lambda v: general.get_distance(v['co'], center))
+    #create_object_selectedverts(selected_verts)
     # center_vert = [v['idx'] for v in selected_verts[0:vert_ten_perc]]
     center_vert = selected_verts[0]
+    #create_centervert(center_vert)
     furthest_vert = selected_verts[-1]
-    radius = 1.0 * general.get_distance(furthest_vert['co'], center_vert['co'])
+    #create_furthestrvert(furthest_vert)
+    radius = radammount * general.get_distance(furthest_vert['co'], center_vert['co'])
 
     # hide the unselected vertices, so they are not impacted by proportional editing
     bpy.ops.mesh.hide(unselected=True)
@@ -125,7 +131,6 @@ def push_pull_region_circular(context, extrusion):
 
     # activate transformation orientation "normal" instead of global
     bpy.context.scene.transform_orientation_slots[0].type = 'NORMAL'
-
     # perform proportional editing (extrusion)
     bpy.ops.transform.translate(value=(0, 0, extrusion * 1.5),
                                 orient_type='NORMAL',

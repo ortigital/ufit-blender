@@ -6,6 +6,7 @@ import bpy
 from ..utils import general, user_interface
 from ....src.properties.properties import ufit_scene_properties
 from ....src import base_globals
+from ....storage import Storage
 
 
 #################################
@@ -151,6 +152,8 @@ def export_device(context):
 # Finish/Restart
 #################################
 def restart_ufit(context, custom_scene_props):
+    Storage.user_use_translate_new_dataname = bpy.context.preferences.view.use_translate_new_dataname
+    bpy.context.preferences.view.use_translate_new_dataname = False
     exclude_props = [
         'ufit_full_screen',
         'ufit_active_step',

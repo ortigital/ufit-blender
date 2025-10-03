@@ -32,3 +32,7 @@ If you encounter any issues or have any questions, feel free to open an [issue](
 ## License
 
 This project is licensed under the [GPL-3.0 License](https://github.com/bert-ugani/ufit-blender/blob/master/LICENSE).
+
+## Troubleshooting
+
+- After changing the language in Blender, click the button "Restart".

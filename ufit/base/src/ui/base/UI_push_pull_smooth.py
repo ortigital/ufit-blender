@@ -44,6 +44,10 @@ class UIPushPullRegions(UFitPanel, bpy.types.Panel):
                 box0_row2 = box0.row()
                 box0_row2.prop(scene, 'ufit_extrude_amount')
 
+                #box0_row3 = box0.row()
+                #box0_row3.prop(scene, 'ufit_radius_amount')
+                
+
                 box1 = layout.box()
                 box1_row0 = box1.row()
                 push_ot = box1_row0.operator(ot_push_pull_region, text='Push')
