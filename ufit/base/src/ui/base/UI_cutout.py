@@ -28,8 +28,11 @@ class UICutout(UFitPanel, bpy.types.Panel):
 
         # box0
         box0 = layout.box()
-        box0.prop(object.data, 'extrude', text='Width')
-        box0.prop(object.data, 'twist_mode')
+        # В стиле разреза straight активный объект уже Mesh, поэтому curve-свойств может не быть
+        if object and hasattr(object.data, 'extrude'):
+            box0.prop(object.data, 'extrude', text='Width')
+        if object and hasattr(object.data, 'twist_mode'):
+            box0.prop(object.data, 'twist_mode')
         box0.prop(context.scene, 'ufit_mean_tilt')
 
         get_standard_navbox(self.layout, "ufit_operators.prev_step", ot_cutout)

@@ -94,7 +94,7 @@ def push_pull_region(context, extrusion, exclude_vertex_groups=None):
     bpy.ops.mesh.vertices_smooth(factor=0.5, repeat=7)
 
 
-def push_pull_region_circular(context, extrusion, radammount):
+def push_pull_region_circular(context, extrusion):
     ufit_obj = bpy.data.objects['uFit']
 
     # select vertices by color attribute layer - exclude default color black
@@ -115,7 +115,7 @@ def push_pull_region_circular(context, extrusion, radammount):
     #create_centervert(center_vert)
     furthest_vert = selected_verts[-1]
     #create_furthestrvert(furthest_vert)
-    radius = radammount * general.get_distance(furthest_vert['co'], center_vert['co'])
+    radius = 1.0 * general.get_distance(furthest_vert['co'], center_vert['co'])
 
     # hide the unselected vertices, so they are not impacted by proportional editing
     bpy.ops.mesh.hide(unselected=True)

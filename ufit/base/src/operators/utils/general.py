@@ -278,15 +278,21 @@ def set_object_origin(bottom_vertex):
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
 
 
-def select_verts_by_co(obj, vert_coordinates):
+def select_verts_by_co(obj, vert_coordinates, tolerance=1e-5):
     # activate vert selection mode
     bpy.ops.mesh.select_mode(type='VERT')
     bpy.ops.mesh.select_all(action='DESELECT')
 
+    # Создаём копии координат как Vector, чтобы переключения режимов не портили исходные данные
+    vert_coordinates = [Vector(co) for co in vert_coordinates]
+
     bpy.ops.object.editmode_toggle()
     for v in obj.data.vertices:
-        if v.co in vert_coordinates:
-            v.select = True
+        for target_co in vert_coordinates:
+            # Булевы и конверсионные операции слегка сдвигают вершины, поэтому сравниваем с допуском
+            if (v.co - target_co).length <= tolerance:
+                v.select = True
+                break
     bpy.ops.object.editmode_toggle()
 
 

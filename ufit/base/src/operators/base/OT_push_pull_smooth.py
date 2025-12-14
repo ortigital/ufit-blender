@@ -30,7 +30,7 @@ class OTPushPullRegion(OTBase):
     def main_func(self, context):
         # get property values
         extrusion = context.scene.ufit_extrude_amount / 1000
-        #radammount = context.scene.ufit_radius_amount
+        # radammount = context.scene.ufit_radius_amount
 
         if self.direction == 'Push':
             extrusion = -extrusion
