@@ -58,4 +58,5 @@ install_*.sh
 ufit/ufit.ini
 
 # ignore patches
-ufit/patches/__init__.py
+ufit/patches/*
+!ufit/patches/__init__example__.py
